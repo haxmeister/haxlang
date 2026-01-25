@@ -2,9 +2,18 @@
 
 Parse Hax v0.1 source files into an AST.
 
-This tool:
-- Performs lexing and parsing only
-- Builds a plain hashref AST
-- Does NOT do name resolution, typechecking, or code generation
+Status: WIP parser front-end (syntax only).
 
-Intended as a spec-validation and development tool.
+Implemented:
+- module header
+- import / from-import
+- sub definitions (pub/priv accepted)
+- blocks
+- statements: var, if/else, case/when/else, return, assignment, expr-stmt
+- expressions: literals, variables, qualified names, calls, unary (not/-), binary (+-*/% and/or comparisons)
+
+Not yet:
+- enums/structs/classes
+- loops
+- field/method access (.)
+- indexing

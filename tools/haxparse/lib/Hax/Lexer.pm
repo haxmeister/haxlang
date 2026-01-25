@@ -4,7 +4,7 @@ use v5.36;
 use strict;
 use warnings;
 
-our $VERSION = '0.001';
+our $VERSION = '0.003';
 
 my %KW = map { $_ => 1 } qw(
   module import from as
@@ -18,6 +18,7 @@ my %KW = map { $_ => 1 } qw(
   break continue return
   and or not
   true false
+  Void Int Num Bool Str
 );
 
 sub new ($class, %args) {
@@ -56,10 +57,16 @@ sub _tok ($self, $type, $value, $line, $col) {
 }
 
 sub next_token ($self) {
+  # skip whitespace and block comments
   while (1) {
     my $ch = $self->_peek(0);
     return $self->_tok('EOF','', $self->{line}, $self->{col}) if $ch eq '';
-    if ($ch =~ /\s/) { $self->_take; next; }
+
+    if ($ch =~ /\s/) {
+      $self->_take;
+      next;
+    }
+
     if ($ch eq '-' && $self->_peek(1) eq '-') {
       my $line = $self->{line};
       my $col  = $self->{col};
@@ -75,6 +82,7 @@ sub next_token ($self) {
       }
       next;
     }
+
     last;
   }
 
@@ -82,22 +90,30 @@ sub next_token ($self) {
   my $col  = $self->{col};
   my $ch   = $self->_peek(0);
 
+  # identifiers / keywords
   if ($ch =~ /[A-Za-z_]/) {
     my $id = '';
-    while ((my $c = $self->_peek(0)) ne '' && $c =~ /[A-Za-z0-9_]/) {
+    while (1) {
+      my $c = $self->_peek(0);
+      last if $c eq '' || $c !~ /[A-Za-z0-9_]/;
       $id .= $self->_take;
     }
     return $self->_tok($KW{$id} ? 'KW' : 'IDENT', $id, $line, $col);
   }
 
+  # numbers
   if ($ch =~ /[0-9]/) {
     my $num = '';
-    while ((my $c = $self->_peek(0)) ne '' && $c =~ /[0-9]/) {
+    while (1) {
+      my $c = $self->_peek(0);
+      last if $c eq '' || $c !~ /[0-9]/;
       $num .= $self->_take;
     }
     if ($self->_peek(0) eq '.' && $self->_peek(1) =~ /[0-9]/) {
       $num .= $self->_take;
-      while ((my $c = $self->_peek(0)) ne '' && $c =~ /[0-9]/) {
+      while (1) {
+        my $c = $self->_peek(0);
+        last if $c eq '' || $c !~ /[0-9]/;
         $num .= $self->_take;
       }
       return $self->_tok('NUM', $num, $line, $col);
@@ -105,6 +121,7 @@ sub next_token ($self) {
     return $self->_tok('INT', $num, $line, $col);
   }
 
+  # strings
   if ($ch eq '"') {
     $self->_take;
     my $out = '';
@@ -129,6 +146,7 @@ sub next_token ($self) {
     return $self->_tok('STR', $out, $line, $col);
   }
 
+  # raw strings
   if ($ch eq "'") {
     $self->_take;
     my $out = '';
@@ -142,6 +160,7 @@ sub next_token ($self) {
     return $self->_tok('RAWSTR', $out, $line, $col);
   }
 
+  # multi-char operators
   for my $op (qw(:: := -> == != <= >= =>)) {
     my $len = length($op);
     if (substr($self->{src}, $self->{i}, $len) eq $op) {
@@ -151,9 +170,12 @@ sub next_token ($self) {
     }
   }
 
-  my %single = map { $_ => 1 } qw(
-    ( ) { } [ ] , ; : . + - * / % < > = ^
+  # single-char punctuation/operators
+  my %single = map { $_ => 1 } (
+    '(', ')', '{', '}', '[', ']', ',', ';', ':', '.',
+    '+', '-', '*', '/', '%', '<', '>', '=', '^', '$', '@',
   );
+
   if ($single{$ch}) {
     $self->_take;
     return $self->_tok('PUNCT', $ch, $line, $col);

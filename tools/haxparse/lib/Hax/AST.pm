@@ -4,7 +4,10 @@ use v5.36;
 use strict;
 use warnings;
 
-our $VERSION = '0.001';
+use Exporter 'import';
+our @EXPORT_OK = qw(node span);
+
+our $VERSION = '0.003';
 
 sub span ($tok0, $tok1=undef) {
   $tok1 //= $tok0;
