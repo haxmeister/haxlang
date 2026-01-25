@@ -1,0 +1,21 @@
+module examples::option_basic;
+
+import std::prelude;
+import std::core::Option as Option;
+
+pub sub main() -> Void {
+  var Option::Option[Int] $x = Option::Some(41);
+  var Int $v = 0;
+
+  case ($x) {
+    when Some(Int $n) {
+      $v = $n + 1;
+    }
+    when None {
+      panic("unexpected None");
+    }
+  }
+
+  assert($v == 42, "option_basic failed");
+  println("option_basic ok");
+}

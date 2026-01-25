@@ -1,0 +1,56 @@
+module std::core::Result;
+
+from std::core::Assert import panic;
+
+--
+Result[T,E] represents success (Ok) or failure (Err).
+--
+
+pub enum Result[T, E] {
+  Ok(T value);
+  Err(E error);
+}
+
+pub sub is_ok(Result[T, E] $r) -> Bool {
+  case ($r) {
+    when Ok(T $v) {
+      return true;
+    }
+    when Err(E $e) {
+      return false;
+    }
+  }
+}
+
+pub sub is_err(Result[T, E] $r) -> Bool {
+  case ($r) {
+    when Ok(T $v) {
+      return false;
+    }
+    when Err(E $e) {
+      return true;
+    }
+  }
+}
+
+pub sub unwrap(Result[T, E] $r, Str $msg) -> T {
+  case ($r) {
+    when Ok(T $v) {
+      return $v;
+    }
+    when Err(E $e) {
+      panic($msg);
+    }
+  }
+}
+
+pub sub unwrap_err(Result[T, E] $r, Str $msg) -> E {
+  case ($r) {
+    when Ok(T $v) {
+      panic($msg);
+    }
+    when Err(E $e) {
+      return $e;
+    }
+  }
+}

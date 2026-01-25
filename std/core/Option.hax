@@ -1,0 +1,56 @@
+module std::core::Option;
+
+from std::core::Assert import panic;
+
+--
+Option[T] represents an optional value.
+--
+
+pub enum Option[T] {
+  None;
+  Some(T value);
+}
+
+pub sub is_some(Option[T] $opt) -> Bool {
+  case ($opt) {
+    when Some(T $v) {
+      return true;
+    }
+    when None {
+      return false;
+    }
+  }
+}
+
+pub sub is_none(Option[T] $opt) -> Bool {
+  case ($opt) {
+    when Some(T $v) {
+      return false;
+    }
+    when None {
+      return true;
+    }
+  }
+}
+
+pub sub unwrap(Option[T] $opt, Str $msg) -> T {
+  case ($opt) {
+    when Some(T $v) {
+      return $v;
+    }
+    when None {
+      panic($msg);
+    }
+  }
+}
+
+pub sub unwrap_or(Option[T] $opt, T $default) -> T {
+  case ($opt) {
+    when Some(T $v) {
+      return $v;
+    }
+    when None {
+      return $default;
+    }
+  }
+}

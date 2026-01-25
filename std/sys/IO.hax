@@ -1,0 +1,38 @@
+module std::sys::IO;
+
+from std::core::Result import Result;
+
+--
+Very small IO façade around sys intrinsics.
+
+Intrinsics (compiler/runtime provided):
+  __sys_write(Int fd, Str buf) -> Int
+  __sys_errno() -> Int
+--
+
+pub struct IOError {
+  pub field Int code;
+  pub field Str msg;
+}
+
+pub sub write_stdout(Str $s) -> Result[Int, IOError] {
+  var Int $rc = __sys_write(1, $s);
+  if ($rc < 0) {
+    var IOError $e;
+    $e.code = __sys_errno();
+    $e.msg  = "write";
+    return Result::Err($e);
+  }
+  return Result::Ok($rc);
+}
+
+pub sub write_stderr(Str $s) -> Result[Int, IOError] {
+  var Int $rc = __sys_write(2, $s);
+  if ($rc < 0) {
+    var IOError $e;
+    $e.code = __sys_errno();
+    $e.msg  = "write";
+    return Result::Err($e);
+  }
+  return Result::Ok($rc);
+}

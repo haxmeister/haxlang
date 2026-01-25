@@ -1,0 +1,18 @@
+module examples::fail::case_not_exhaustive;
+
+import std::prelude;
+import std::core::Option as Option;
+
+pub sub main() -> Void {
+  var Option::Option[Int] $x = Option::Some(1);
+  var Int $v = 0;
+
+  -- This should be a compile-time error: case over enum must be exhaustive (no else, missing None). --
+  case ($x) {
+    when Some(Int $n) {
+      $v = $n;
+    }
+  }
+
+  println("unreachable if checker works");
+}

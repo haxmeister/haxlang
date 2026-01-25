@@ -1,0 +1,14 @@
+module examples::fail::ref_param_rebind;
+
+import std::prelude;
+
+pub sub bad(^Int $p) -> Void {
+  var Int $x = 0;
+  -- This should be a compile-time error: ^ parameters cannot be rebound with :=. --
+  $p := addr($x);
+}
+
+pub sub main() -> Void {
+  var Int $n = 1;
+  bad(addr($n));
+}

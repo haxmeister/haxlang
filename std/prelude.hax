@@ -1,0 +1,17 @@
+module std::prelude;
+
+from std::core::Assert import assert, panic;
+
+--
+Prelude convenience functions.
+This module intentionally stays small in v0.1.
+--
+
+pub sub print(Str $s) -> Void {
+  __print($s);
+}
+
+pub sub println(Str $s) -> Void {
+  __print($s);
+  __print("\n");
+}

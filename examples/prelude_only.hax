@@ -1,0 +1,21 @@
+module examples::prelude_only;
+
+import std::prelude;
+
+sub main() {
+  var $x = Some(41);
+
+  var $v;
+
+  case ($x) {
+    when Some($n) {
+      $v = $n + 1;
+    }
+    when None {
+      panic("unexpected None");
+    }
+  }
+
+  assert($v == 42);
+  println("stdlib prelude ok");
+}

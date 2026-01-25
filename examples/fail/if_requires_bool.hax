@@ -1,0 +1,12 @@
+module examples::fail::if_requires_bool;
+
+import std::prelude;
+
+pub sub main() -> Void {
+  -- This should be a compile-time error: condition must be Bool (no truthiness). --
+  if (1) {
+    println("bad");
+  } else {
+    println("also bad");
+  }
+}

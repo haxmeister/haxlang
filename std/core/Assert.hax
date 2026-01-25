@@ -1,0 +1,19 @@
+module std::core::Assert;
+
+--
+Intrinsics (compiler/runtime provided):
+  __panic(Str) -> Void
+
+Semantics note:
+  __panic is intended to be non-returning.
+--
+
+pub sub panic(Str $msg) -> Void {
+  __panic($msg);
+}
+
+pub sub assert(Bool $cond, Str $msg) -> Void {
+  if (not $cond) {
+    panic($msg);
+  }
+}

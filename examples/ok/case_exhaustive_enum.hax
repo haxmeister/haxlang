@@ -1,0 +1,21 @@
+module examples::case_exhaustive_enum;
+
+import std::prelude;
+import std::core::Option as Option;
+
+pub sub main() -> Void {
+  var Option::Option[Int] $x = Option::None;
+  var Int $v = 0;
+
+  case ($x) {
+    when Some(Int $n) {
+      $v = $n;
+    }
+    when None {
+      $v = 99;
+    }
+  }
+
+  assert($v == 99, "case_exhaustive_enum failed");
+  println("case_exhaustive_enum ok");
+}

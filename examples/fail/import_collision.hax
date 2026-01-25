@@ -1,0 +1,9 @@
+module examples::fail::import_collision;
+
+from std::core::Assert import assert;
+from std::core::Assert import assert;
+
+pub sub main() -> Void {
+  -- This should be a compile-time error: duplicate imported name collision. --
+  assert(true, "dup import should have failed before this");
+}

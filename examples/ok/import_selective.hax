@@ -1,0 +1,9 @@
+module examples::import_selective;
+
+from std::core::Assert import assert, panic;
+import std::prelude;
+
+pub sub main() -> Void {
+  assert(true, "should not fire");
+  println("import_selective ok");
+}

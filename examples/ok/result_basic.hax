@@ -1,0 +1,17 @@
+module examples::result_basic;
+
+import std::prelude;
+import std::core::Result as Result;
+
+pub sub main() -> Void {
+  var Result::Result[Int, Str] $r = Result::Ok(7);
+
+  if (Result::is_ok($r)) {
+    var Int $v = Result::unwrap($r, "unwrap failed");
+    assert($v == 7, "result value wrong");
+  } else {
+    panic("expected Ok");
+  }
+
+  println("result_basic ok");
+}

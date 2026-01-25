@@ -1,0 +1,7 @@
+module examples::prelude_only;
+
+import std::prelude;
+
+pub sub main() -> Void {
+  println("prelude_only ok");
+}
