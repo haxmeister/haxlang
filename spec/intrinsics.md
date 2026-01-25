@@ -10,7 +10,6 @@ permitted "magic" in v0.1.
 - Intrinsic names **must** begin with `__`.
 - Intrinsics are **not** imported; they are always available to all modules.
 - Intrinsics are compile-time known and link-time resolved by the toolchain/runtime.
-- Unless otherwise stated, intrinsics are **pure functions** with no observable side effects.
 
 ## Required intrinsics
 
@@ -21,7 +20,7 @@ permitted "magic" in v0.1.
 __panic(Str msg) -> Void
 ```
 - Aborts execution immediately.
-- **Noreturn:** control-flow never continues past a call to `__panic`.
+- **Noreturn:** `__panic` is noreturn; code after a call is unreachable for control-flow checking.
 
 ### 2) Output
 
