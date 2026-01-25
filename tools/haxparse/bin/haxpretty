@@ -1,0 +1,21 @@
+#!/usr/bin/env perl
+use v5.36;
+use strict;
+use warnings;
+
+use FindBin qw($Bin);
+use lib "$Bin/../lib";
+
+use Hax::Lexer;
+use Hax::Parser;
+use Hax::AST::Pretty;
+
+my $path = shift @ARGV or die "usage: haxpretty FILE.hax\n";
+open(my $fh, '<:encoding(UTF-8)', $path) or die "open $path: $!\n";
+my $src = do { local $/; <$fh> };
+
+my $lex = Hax::Lexer->new(file => $path, src => $src);
+my $p   = Hax::Parser->new(lexer => $lex);
+my $ast = $p->parse;
+
+print Hax::AST::Pretty::pretty($ast);
