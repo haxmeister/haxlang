@@ -1,0 +1,6 @@
+module Main;
+
+pub sub main([Str] @args) -> Int {
+  print("Hello from Hax!\n");
+  return 0;
+}

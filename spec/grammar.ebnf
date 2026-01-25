@@ -1,0 +1,192 @@
+(*
+  Hax Language Grammar (EBNF)
+  Version: v0.1
+  Status: Draft (syntax locked for current design)
+  Notes:
+  - Lexing handles comments -- ... --, strings, numbers, keywords.
+*)
+
+file        ::= module_decl imports? top_decl* EOF ;
+
+module_decl ::= "module" qual_name ";" ;
+
+imports     ::= import_stmt* ;
+
+import_stmt ::= "import" qual_name ("as" IDENT)? ";"
+              | "from" qual_name "import" import_list ";" ;
+
+import_list ::= IDENT ("," IDENT)* ;
+
+top_decl    ::= visibility? ( enum_decl
+                            | struct_decl
+                            | class_decl
+                            | sub_decl
+                            | global_var_decl
+                            ) ;
+
+visibility  ::= "pub" | "priv" ;
+
+global_var_decl ::= "var" "(" "global" ")" type? var_bind_or_init ";" ;
+
+var_bind_or_init ::= sigil IDENT ( ":=" expr | "=" expr )?
+                   | "^" IDENT ":=" expr ;
+
+enum_decl   ::= "enum" type_name type_params? "{" enum_variant* "}" ;
+
+type_params ::= "[" type_param ("," type_param)* "]" ;
+type_param  ::= IDENT ;
+
+enum_variant ::= IDENT enum_payload? ";" ;
+enum_payload ::= "(" enum_fields ")" ;
+enum_fields  ::= type IDENT? ("," type IDENT?)* ;
+
+struct_decl ::= "struct" type_name type_params? "{" type_member* "}" ;
+class_decl  ::= "class"  type_name type_params? "{" type_member* "}" ;
+
+type_name   ::= IDENT ;
+
+type_member ::= field_decl
+              | method_decl
+              | assoc_sub_decl ;
+
+field_decl  ::= visibility? "field" type IDENT ";" ;
+
+method_decl ::= visibility? ("mut")? "method" IDENT "(" param_list? ")" ret_annot? block ;
+
+assoc_sub_decl ::= visibility? "sub" IDENT "(" param_list? ")" ret_annot? block ;
+
+sub_decl    ::= visibility? "sub" IDENT "(" param_list? ")" ret_annot? block ;
+
+ret_annot   ::= "->" type ;
+
+param_list  ::= param ("," param)* ;
+
+param       ::= type sigil IDENT
+              | type "^" IDENT ;
+
+sigil       ::= "$" | "@" | "%" ;
+
+type        ::= qual_type type_args?
+              | array_type
+              | hash_type ;
+
+qual_type   ::= qual_name ;
+
+type_args   ::= "[" type ("," type)* "]" ;
+
+array_type  ::= "[" type "]" ;
+hash_type   ::= "{" type ":" type "}" ;
+
+qual_name   ::= IDENT ("::" IDENT)* ;
+
+block       ::= "{" stmt* "}" ;
+
+stmt        ::= var_decl ";"
+              | assign_stmt ";"
+              | expr_stmt ";"
+              | if_stmt
+              | while_stmt
+              | for_stmt
+              | foreach_stmt
+              | case_stmt
+              | break_stmt ";"
+              | continue_stmt ";"
+              | return_stmt ";"
+              | ";" ;
+
+var_decl    ::= "var" scope_annot? type? var_bind_or_init_local ;
+
+scope_annot ::= "(" ("local" | "static") ")" ;
+
+var_bind_or_init_local ::= sigil IDENT ( "=" expr )?
+                         | "^" IDENT ":=" expr ;
+
+assign_stmt ::= lvalue ( ":=" expr | "=" expr ) ;
+
+lvalue      ::= var_ref lvalue_suffix*
+              | "(" lvalue ")" ;
+
+var_ref     ::= sigil IDENT
+              | "^" IDENT ;
+
+lvalue_suffix ::= index_suffix
+                | member_suffix ;
+
+index_suffix ::= "[" expr "]"
+               | "{" expr "}" ;
+
+member_suffix ::= "." IDENT ;
+
+expr_stmt   ::= expr ;
+
+if_stmt     ::= "if" "(" expr ")" block elsif_clause* else_clause? ;
+elsif_clause ::= "elsif" "(" expr ")" block ;
+else_clause ::= "else" block ;
+
+while_stmt  ::= "while" "(" expr ")" block ;
+
+for_stmt    ::= "for" "(" for_init? ";" for_cond? ";" for_step? ")" block ;
+for_init    ::= var_decl | assign_stmt | expr_stmt ;
+for_cond    ::= expr ;
+for_step    ::= assign_stmt | expr_stmt ;
+
+foreach_stmt ::= "foreach" "(" foreach_bind "in" expr ")" block ;
+foreach_bind ::= type? "$" IDENT ;
+
+case_stmt   ::= "case" "(" expr ")" "{" when_clause+ else_clause? "}" ;
+
+when_clause ::= "when" when_pat block ;
+
+when_pat    ::= IDENT when_pat_payload?
+              | expr ;
+
+when_pat_payload ::= "(" pat_bind_list? ")" ;
+
+pat_bind_list ::= pat_bind ("," pat_bind)* ;
+
+pat_bind    ::= type? "$" IDENT ;
+
+break_stmt  ::= "break" ;
+continue_stmt ::= "continue" ;
+
+return_stmt ::= "return" (expr)? ;
+
+expr        ::= logic_or ;
+
+logic_or    ::= logic_and ( "or" logic_and )* ;
+logic_and   ::= equality ( "and" equality )* ;
+
+equality    ::= relational ( ( "==" | "!=" ) relational )* ;
+
+relational  ::= additive ( ( "<" | "<=" | ">" | ">=" ) additive )* ;
+
+additive    ::= multiplicative ( ( "+" | "-" ) multiplicative )* ;
+
+multiplicative ::= unary ( ( "*" | "/" | "%" ) unary )* ;
+
+unary       ::= ( "not" | "-" ) unary
+              | postfix ;
+
+postfix     ::= primary postfix_suffix* ;
+
+postfix_suffix ::= call_suffix
+                 | index_suffix
+                 | member_suffix ;
+
+call_suffix ::= "(" arg_list? ")" ;
+
+arg_list    ::= expr ("," expr)* ;
+
+primary     ::= literal
+              | var_ref
+              | qual_name
+              | "(" expr ")"
+              | array_lit
+              | hash_lit ;
+
+array_lit   ::= "[" (expr ("," expr)*)? "]" ;
+
+hash_lit    ::= "{" (hash_pair ("," hash_pair)*)? "}" ;
+hash_pair   ::= expr "=>" expr ;
+
+literal     ::= INT_LIT | NUM_LIT | STR_LIT | "true" | "false" ;

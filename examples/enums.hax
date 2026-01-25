@@ -1,0 +1,14 @@
+module Examples::Enums;
+
+pub enum OptionInt {
+  None;
+  Some(Int $value);
+}
+
+pub sub half(Int $x) -> OptionInt {
+  if ($x % 2 == 0) {
+    return Some($x / 2);
+  } else {
+    return None;
+  }
+}

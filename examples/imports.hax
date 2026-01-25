@@ -1,0 +1,10 @@
+module Examples::Imports;
+
+import Examples::Enums as E;
+
+pub sub demo() -> Void {
+  case (E::half(10)) {
+    when Some(Int $n) { print("half="); print(str($n)); print("\n"); }
+    when None { print("odd\n"); }
+  }
+}
