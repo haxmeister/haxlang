@@ -1,0 +1,7 @@
+module Example::BoolOpAndRequiresBool;
+
+pub sub main() -> Void {
+  var Int $x = 1;
+  var Bool $b = $x and true;
+  return;
+}

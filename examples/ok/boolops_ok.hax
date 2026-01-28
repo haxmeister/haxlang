@@ -1,0 +1,12 @@
+module Example::BoolOpsOk;
+
+pub sub main() -> Void {
+  var Bool $a = true;
+  var Bool $b = false;
+
+  var Bool $c = not $a;
+  var Bool $d = $a and $b;
+  var Bool $e = $a or $b;
+
+  return;
+}

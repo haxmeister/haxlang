@@ -9,6 +9,10 @@ use lib "$Bin/../lib";
 use Hax::Lexer;
 use Hax::Parser;
 use Hax::Check::Imports;
+use Hax::Check::ImportCollision;
+use Hax::Check::BoolOps;
+use Hax::Check::CaseExhaustive;
+use Hax::Check::RefParamRebind;
 use Hax::Check::Unreachable;
 use Hax::Check::MustReturn;
 
@@ -30,6 +34,30 @@ sub parse_and_check ($path) {
     die "$e->{msg} at $e->{file}:$e->{line}:$e->{col}\n";
   }
 
+  my @ic = Hax::Check::ImportCollision::check_module($ast);
+  if (@ic) {
+    my $e = $ic[0];
+    die "$e->{msg} at $e->{file}:$e->{line}:$e->{col}\n";
+  }
+
+  my @c = Hax::Check::CaseExhaustive::check_module($ast, std_root => 'std');
+  if (@c) {
+    my $e = $c[0];
+    die "$e->{msg} at $e->{file}:$e->{line}:$e->{col}\n";
+  }
+
+  my @b = Hax::Check::BoolOps::check_module($ast);
+  if (@b) {
+    my $e = $b[0];
+    die "$e->{msg} at $e->{file}:$e->{line}:$e->{col}\n";
+  }
+
+  my @r = Hax::Check::RefParamRebind::check_module($ast);
+  if (@r) {
+    my $e = $r[0];
+    die "$e->{msg} at $e->{file}:$e->{line}:$e->{col}\n";
+  }
+
   my @u = Hax::Check::Unreachable::check_module($ast);
   if (@u) {
     my $e = $u[0];
@@ -45,7 +73,21 @@ sub parse_and_check ($path) {
   return 1;
 }
 
-my $dir = shift(@ARGV) // 'examples/ok';
+my $arg = shift(@ARGV) // 'examples/ok';
+
+# Accept either a directory (default) or a single .hax file path.
+if (-f $arg) {
+  my $path = $arg;
+  eval { parse_and_check($path); 1 } or do {
+    chomp(my $err = $@ || "error");
+    print "NOT OK  $path\n$err\n";
+    exit 1;
+  };
+  print "OK      $path\n\nSummary: OK=1  FAIL=0\n";
+  exit 0;
+}
+
+my $dir = $arg;
 
 opendir(my $dh, $dir) or die "opendir $dir: $!\n";
 my @files = sort grep { /\.hax\z/ && -f "$dir/$_" } readdir($dh);

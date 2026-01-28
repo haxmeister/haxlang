@@ -56,6 +56,35 @@ sub _pp ($outref, $node, $lvl, $opt) {
     return;
   }
 
+  if ($k eq 'Enum') {
+    my $vis = $node->{vis} ? "$node->{vis} " : "";
+    my $name = $node->{name} // "<Enum>";
+    my $tp = "";
+    if (my $tps = $node->{tparams}) {
+      $tp = "[" . join(", ", @$tps) . "]" if @$tps;
+    }
+    _line($outref, $lvl, "${vis}enum ${name}${tp} {");
+    for my $v (@{ $node->{variants} // [] }) {
+      _pp($outref, $v, $lvl+1, $opt);
+    }
+    _line($outref, $lvl, "}");
+    return;
+  }
+
+  if ($k eq 'EnumVariant') {
+    my $name = $node->{name} // "<Variant>";
+    my @fields = @{ $node->{fields} // [] };
+    if (@fields) {
+      my $inside = join(", ", map { _pp_enum_field_inline($_) } @fields);
+      _line($outref, $lvl, "$name($inside);");
+    } else {
+      _line($outref, $lvl, "$name;");
+    }
+    return;
+  }
+
+
+
   if ($k eq 'Block') {
     _line($outref, $lvl, "Block");
     for my $st (@{ $node->{stmts} // [] }) { _pp($outref, $st, $lvl+1, $opt); }
@@ -138,6 +167,16 @@ sub _pp_type_inline ($t) {
     return "$base\[$args\]";
   }
   return "<type:$k>";
+}
+
+
+sub _pp_enum_field_inline ($f) {
+  return "<field?>" if !$f || ref($f) ne 'HASH';
+  my $ty = _pp_type_inline($f->{type});
+  if (defined($f->{sigil}) && defined($f->{name})) {
+    return "$ty $f->{sigil}$f->{name}";
+  }
+  return "$ty";
 }
 
 sub _pp_param_inline ($p) {

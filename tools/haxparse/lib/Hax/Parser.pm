@@ -69,13 +69,16 @@ sub parse_item ($self) {
     $vis = $self->_eat('KW')->{value};
   }
 
+  if ($self->_peek_kw('enum')) {
+    return $self->parse_enum($vis);
+  }
+
   if ($self->_peek_kw('sub')) {
     return $self->parse_sub($vis);
   }
 
   $self->_err("Unexpected top-level item");
 }
-
 sub parse_import ($self) {
   my $t0 = $self->{cur};
 
@@ -156,6 +159,68 @@ sub parse_type ($self) {
 
   return node('TypeName', span($t0, $self->{cur}), name => $base);
 }
+
+
+# ---- Enums ----
+
+sub parse_enum ($self, $vis) {
+  my $t0 = $self->_eat_kw('enum');
+  my $name = $self->_eat('IDENT')->{value};
+
+  # Optional type params: enum Name[T,U] { ... }
+  my @tparams;
+  if ($self->_peek_p('[')) {
+    $self->_eat_p('[');
+    push @tparams, $self->_eat('IDENT')->{value};
+    while ($self->_peek_p(',')) {
+      $self->_eat_p(',');
+      push @tparams, $self->_eat('IDENT')->{value};
+    }
+    $self->_eat_p(']');
+  }
+
+  $self->_eat_p('{');
+  my @variants;
+
+  # Allow empty enums (reserved); otherwise parse variants until '}'
+  while (!$self->_peek_p('}')) {
+    my $vt0 = $self->{cur};
+    my $vname = $self->_eat('IDENT')->{value};
+
+    my @fields;
+    if ($self->_peek_p('(')) {
+      $self->_eat_p('(');
+      if (!$self->_peek_p(')')) {
+        push @fields, $self->parse_enum_field;
+        while ($self->_peek_p(',')) {
+          $self->_eat_p(',');
+          push @fields, $self->parse_enum_field;
+        }
+      }
+      $self->_eat_p(')');
+    }
+
+    $self->_eat_p(';');
+    push @variants, node('EnumVariant', span($vt0, $self->{cur}), name => $vname, fields => \@fields);
+  }
+
+  $self->_eat_p('}');
+  return node('Enum', span($t0, $self->{cur}), vis => $vis, name => $name, tparams => \@tparams, variants => \@variants);
+}
+
+sub parse_enum_field ($self) {
+  my $t0 = $self->{cur};
+  my $type = $self->parse_type;
+
+  # Optional binder: Int $value
+  my ($sigil, $name);
+  if ($self->_peek_p('$') || $self->_peek_p('@') || $self->_peek_p('%')) {
+    ($sigil, $name) = $self->parse_var_name;
+  }
+
+  return node('EnumField', span($t0, $self->{cur}), type => $type, sigil => $sigil, name => $name);
+}
+
 
 # ---- Subroutines ----
 
