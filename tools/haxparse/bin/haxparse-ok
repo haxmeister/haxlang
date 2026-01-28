@@ -10,6 +10,7 @@ use Hax::Lexer;
 use Hax::Parser;
 use Hax::Check::Imports;
 use Hax::Check::ImportCollision;
+use Hax::Check::ResolveImports;
 use Hax::Check::BoolOps;
 use Hax::Check::CaseExhaustive;
 use Hax::Check::RefParamRebind;
@@ -37,6 +38,12 @@ sub parse_and_check ($path) {
   my @ic = Hax::Check::ImportCollision::check_module($ast);
   if (@ic) {
     my $e = $ic[0];
+    die "$e->{msg} at $e->{file}:$e->{line}:$e->{col}\n";
+  }
+
+  my @ri = Hax::Check::ResolveImports::check_module($ast, std_root => 'std');
+  if (@ri) {
+    my $e = $ri[0];
     die "$e->{msg} at $e->{file}:$e->{line}:$e->{col}\n";
   }
 

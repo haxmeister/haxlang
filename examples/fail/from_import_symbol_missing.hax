@@ -1,0 +1,7 @@
+module Fail::FromImportSymbolMissing;
+
+from ZZZ::HasExports import MissingThing;
+
+sub main() -> Int {
+  return 0;
+}

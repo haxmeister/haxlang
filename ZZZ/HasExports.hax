@@ -1,0 +1,5 @@
+module ZZZ::HasExports;
+
+pub sub Present() -> Int {
+  return 1;
+}

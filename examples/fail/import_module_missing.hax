@@ -1,0 +1,7 @@
+module Fail::ImportModuleMissing;
+
+import ZZZ::ThisModuleDoesNotExist;
+
+sub main() -> Int {
+  return 0;
+}

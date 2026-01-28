@@ -21,6 +21,9 @@ closedir($dh);
 # Add to this list as new checks land.
 my %must_fail_now = map { $_ => 1 } qw(
   import_collision.hax
+  import_module_missing.hax
+  from_import_module_missing.hax
+  from_import_symbol_missing.hax
   case_not_exhaustive.hax
   boolop_not_requires_bool.hax
   boolop_and_requires_bool.hax
