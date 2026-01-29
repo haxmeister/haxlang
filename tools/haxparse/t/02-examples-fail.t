@@ -30,6 +30,10 @@ my %must_fail_now = map { $_ => 1 } qw(
   boolop_and_requires_bool.hax
   boolop_or_requires_bool.hax
   ref_param_rebind.hax
+  case_payload_arity_too_few.hax
+  case_payload_arity_unit_bind.hax
+  case_payload_type_mismatch.hax
+  case_binder_scope_leak.hax
 );
 
 for my $f (@files) {

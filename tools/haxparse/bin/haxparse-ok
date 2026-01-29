@@ -13,6 +13,8 @@ use Hax::Check::ImportCollision;
 use Hax::Check::ResolveImports;
 use Hax::Check::BoolOps;
 use Hax::Check::CaseExhaustive;
+use Hax::Check::CasePayloads;
+use Hax::Check::CaseBinderScope;
 use Hax::Check::RefParamRebind;
 use Hax::Check::Unreachable;
 use Hax::Check::MustReturn;
@@ -50,6 +52,18 @@ sub parse_and_check ($path) {
   my @c = Hax::Check::CaseExhaustive::check_module($ast, std_root => 'std');
   if (@c) {
     my $e = $c[0];
+    die "$e->{msg} at $e->{file}:$e->{line}:$e->{col}\n";
+  }
+
+  my @cp = Hax::Check::CasePayloads::check_module($ast, std_root => 'std');
+  if (@cp) {
+    my $e = $cp[0];
+    die "$e->{msg} at $e->{file}:$e->{line}:$e->{col}\n";
+  }
+
+  my @s = Hax::Check::CaseBinderScope::check_module($ast);
+  if (@s) {
+    my $e = $s[0];
     die "$e->{msg} at $e->{file}:$e->{line}:$e->{col}\n";
   }
 

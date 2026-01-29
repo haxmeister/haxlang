@@ -1,0 +1,17 @@
+module CaseBinderScopeOk;
+
+enum Opt {
+  Some(Int $a);
+  None;
+}
+
+sub f(Opt $p) -> Int {
+  case($p) {
+    when Some(Int $x) {
+      return $x;
+    }
+    else {
+      return 0;
+    }
+  }
+}

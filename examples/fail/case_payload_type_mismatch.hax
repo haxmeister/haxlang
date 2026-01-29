@@ -1,0 +1,16 @@
+module CasePayloadTypeMismatch;
+
+enum Pair {
+  Pair(Int $a, Bool $b);
+}
+
+sub f(Pair $p) -> Int {
+  case($p) {
+    when Pair(Bool $x, Bool $y) {
+      return 1;
+    }
+    else {
+      return 0;
+    }
+  }
+}
