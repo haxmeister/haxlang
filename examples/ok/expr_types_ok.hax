@@ -1,0 +1,13 @@
+module ZZZ::ExprTypesOk;
+
+sub takes2(Int $a, Bool $b) -> Int {
+  return $a;
+}
+
+sub main() -> Int {
+  var Int $x := 1;
+  var Bool $b := true;
+
+  $x := takes2($x, $b);
+  return $x;
+}

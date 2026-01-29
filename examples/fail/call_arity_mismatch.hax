@@ -1,0 +1,7 @@
+module ZZZ::CallArityMismatch;
+
+sub f(Int $a, Bool $b) -> Int { return $a; }
+
+sub main() -> Int {
+  return f(1);
+}

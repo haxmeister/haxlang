@@ -1,0 +1,5 @@
+module ZZZ::ReturnTypeMismatch;
+
+sub main() -> Int {
+  return true;
+}

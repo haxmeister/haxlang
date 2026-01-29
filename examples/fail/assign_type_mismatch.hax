@@ -1,0 +1,7 @@
+module ZZZ::AssignTypeMismatch;
+
+sub main() -> Int {
+  var Int $x := 1;
+  $x := true;
+  return $x;
+}

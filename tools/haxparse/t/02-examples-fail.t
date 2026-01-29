@@ -34,6 +34,10 @@ my %must_fail_now = map { $_ => 1 } qw(
   case_payload_arity_unit_bind.hax
   case_payload_type_mismatch.hax
   case_binder_scope_leak.hax
+  assign_type_mismatch.hax
+  return_type_mismatch.hax
+  call_arity_mismatch.hax
+  call_arg_type_mismatch.hax
 );
 
 for my $f (@files) {

@@ -1,0 +1,7 @@
+module ZZZ::CallArgTypeMismatch;
+
+sub f(Int $a, Bool $b) -> Int { return $a; }
+
+sub main() -> Int {
+  return f(true, 1);
+}
