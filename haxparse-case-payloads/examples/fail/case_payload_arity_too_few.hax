@@ -1,0 +1,16 @@
+module CasePayloadArityTooFew;
+
+enum Pair {
+  Pair(Int $a, Int $b);
+}
+
+sub f(Pair $p) -> Int {
+  case($p) {
+    when Pair(Int $x) {
+      return 1;
+    }
+    else {
+      return 0;
+    }
+  }
+}

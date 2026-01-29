@@ -1,0 +1,16 @@
+module CasePayloadArityUnitBind;
+
+enum E {
+  None;
+}
+
+sub f(E $e) -> Int {
+  case($e) {
+    when None(Int $x) {
+      return 1;
+    }
+    else {
+      return 0;
+    }
+  }
+}

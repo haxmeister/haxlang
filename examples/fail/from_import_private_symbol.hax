@@ -1,0 +1,7 @@
+module Fail::FromImportPrivateSymbol;
+
+from ZZZ::HasExports import Hidden;
+
+sub main() -> Int {
+  return 0;
+}
