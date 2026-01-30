@@ -7,14 +7,15 @@ use warnings;
 our $VERSION = '0.003';
 
 # Conservative unreachable-code checker for Hax v0.1.
-# Flags statements after an unconditional terminator (return or panic-like call)
+# Flags statements after an unconditional terminator (return or Never-typed expression)
 # within the same block.
 #
 # Notes:
 # - We do not assume `case` without `else` is exhaustive (type info not available here).
-# - We treat these calls as "noreturn" for unreachable detection:
-#     __panic(...), panic(...), any fully-qualified *::panic(...)
-#     (and a small allowlist for older spellings).
+# - This checker expects ExprTypes to have annotated expressions with a computed
+#   type in `$node->{_type}`. In particular, panic-like noreturn calls are typed
+#   as `Never`, and any statement whose evaluated expression is `Never` is
+#   treated as terminating the current block.
 
 sub check_module ($mod_ast) {
   my @errs;
@@ -68,28 +69,28 @@ my $k = $st->{kind} // '';
 return 1 if $k eq 'Return';
 
 if ($k eq 'VarDecl') {
-  # If the initializer is a noreturn call, the declaration terminates the block.
-  return _expr_is_noreturn_call($st->{init});
+  # If the initializer is Never, the declaration terminates the block.
+  return _expr_is_never($st->{init});
 }
 
 if ($k eq 'ExprStmt') {
-  return _expr_is_noreturn_call($st->{expr});
+  return _expr_is_never($st->{expr});
 }
 
 if ($k eq 'Assign') {
-  return _expr_is_noreturn_call($st->{rhs});
+  return _expr_is_never($st->{rhs});
 }
 
 if ($k eq 'If') {
   # If evaluating the condition never returns, the whole statement terminates.
-  return 1 if _expr_is_noreturn_call($st->{cond});
+  return 1 if _expr_is_never($st->{cond});
 
   return 0 unless $st->{else};
   return _block_terminates($st->{then}) && _block_terminates($st->{else});
 }
 
 if ($k eq 'While') {
-  return 1 if _expr_is_noreturn_call($st->{cond});
+  return 1 if _expr_is_never($st->{cond});
   return 0;
 }
 
@@ -114,35 +115,12 @@ sub _block_terminates ($blk) {
   return _stmt_terminates($stmts->[-1]);
 }
 
-sub _expr_is_noreturn_call ($e) {
-\
+sub _expr_is_never ($e) {
   return 0 if !$e || ref($e) ne 'HASH';
-
-  # Recognize a direct call expression.
-  if (($e->{kind} // '') eq 'Call') {
-    my $callee = $e->{callee};
-    return 0 if !$callee || ref($callee) ne 'HASH';
-    return 0 unless ($callee->{kind} // '') eq 'Name';
-
-    my $name = $callee->{name} // '';
-
-    # Historical spellings.
-    return 1 if $name eq '__panic';
-    return 1 if $name eq 'panic';
-    return 1 if $name eq 'std::core::Assert::panic';
-    return 1 if $name eq 'std::prelude::panic';
-
-    # General rule: any fully-qualified *::panic is noreturn.
-    return 1 if $name =~ /::panic\z/;
-
-    # Future hook: abort/fatal, if you add them.
-    return 1 if $name =~ /::abort\z/;
-
-    return 0;
-  }
-
-  return 0;
-
+  my $t = $e->{_type};
+  return 0 if !$t || ref($t) ne 'HASH';
+  return 0 unless ($t->{kind} // '') eq 'TypeName';
+  return (($t->{name} // '') eq 'Never') ? 1 : 0;
 }
 
 sub _mk_err ($node, $msg) {

@@ -10,7 +10,7 @@ our $VERSION = '0.001';
 # For non-Void functions:
 # - Every control-flow path must end with `return EXPR;`
 # - `return;` (no expr) is an error
-# `panic()` and `__panic()` are treated as noreturn terminators.
+# Any expression with type `Never` is treated as a noreturn terminator.
 
 sub check_module ($mod_ast) {
   my @errs;
@@ -103,10 +103,12 @@ sub _stmt_must_terminate ($st) {
   my $k = $st->{kind} // '';
 
   return 1 if $k eq 'Return';
-  return 1 if $k eq 'ExprStmt' && _expr_is_panic_call($st->{expr});
-  return 1 if $k eq 'Assign'   && _expr_is_panic_call($st->{rhs});
+  return 1 if $k eq 'VarDecl'  && _expr_is_never($st->{init});
+  return 1 if $k eq 'ExprStmt' && _expr_is_never($st->{expr});
+  return 1 if $k eq 'Assign'   && _expr_is_never($st->{rhs});
 
   if ($k eq 'If') {
+    return 1 if _expr_is_never($st->{cond});
     return 0 unless $st->{else};
     return _block_must_terminate($st->{then}) && _block_must_terminate($st->{else});
   }
@@ -123,22 +125,12 @@ sub _stmt_must_terminate ($st) {
   return 0;
 }
 
-sub _expr_is_panic_call ($e) {
+sub _expr_is_never ($e) {
   return 0 if !$e || ref($e) ne 'HASH';
-  return 0 if ($e->{kind} // '') ne 'Call';
-
-  my $callee = $e->{callee};
-  return 0 if !$callee || ref($callee) ne 'HASH';
-  return 0 unless ($callee->{kind} // '') eq 'Name';
-
-  my $name = $callee->{name} // '';
-
-  return 1 if $name eq '__panic';
-  return 1 if $name eq 'panic';
-  return 1 if $name eq 'std::core::Assert::panic';
-  return 1 if $name eq 'std::prelude::panic';
-
-  return 0;
+  my $t = $e->{_type};
+  return 0 if !$t || ref($t) ne 'HASH';
+  return 0 unless ($t->{kind} // '') eq 'TypeName';
+  return (($t->{name} // '') eq 'Never') ? 1 : 0;
 }
 
 sub _mk_err ($node, $msg) {

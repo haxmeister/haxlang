@@ -16,9 +16,9 @@ use Hax::Check::CaseExhaustive;
 use Hax::Check::CasePayloads;
 use Hax::Check::CaseBinderScope;
 use Hax::Check::RefParamRebind;
+use Hax::Check::ExprTypes;
 use Hax::Check::Unreachable;
 use Hax::Check::MustReturn;
-use Hax::Check::ExprTypes;
 
 sub slurp_utf8 ($path) {
   open(my $fh, '<:encoding(UTF-8)', $path) or die "open $path: $!\n";
@@ -80,6 +80,12 @@ sub parse_and_check ($path) {
     die "$e->{msg} at $e->{file}:$e->{line}:$e->{col}\n";
   }
 
+  my @t = Hax::Check::ExprTypes::check_module($ast);
+  if (@t) {
+    my $e = $t[0];
+    die "$e->{msg} at $e->{file}:$e->{line}:$e->{col}\n";
+  }
+
   my @u = Hax::Check::Unreachable::check_module($ast);
   if (@u) {
     my $e = $u[0];
@@ -89,12 +95,6 @@ sub parse_and_check ($path) {
   my @m = Hax::Check::MustReturn::check_module($ast);
   if (@m) {
     my $e = $m[0];
-    die "$e->{msg} at $e->{file}:$e->{line}:$e->{col}\n";
-  }
-
-  my @t = Hax::Check::ExprTypes::check_module($ast);
-  if (@t) {
-    my $e = $t[0];
     die "$e->{msg} at $e->{file}:$e->{line}:$e->{col}\n";
   }
   return 1;

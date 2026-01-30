@@ -151,6 +151,11 @@ sub _walk_stmt ($n, $env, $subs, $errs, $ret_type) {
     return;
   }
 
+  if ($k eq 'ExprStmt') {
+    _infer_expr_type($n->{expr}, $env, $subs, $errs);
+    return;
+  }
+
 
   if ($k eq 'Return') {
     if (!defined $n->{expr}) {
@@ -238,7 +243,7 @@ sub _infer_expr_type ($n, $env, $subs, $errs) {
       _err($errs, $n, "undefined variable $n->{sigil}$n->{name}");
       return undef;
     }
-    return $t;
+    return _set_type($n, $t);
   }
 
   if ($k eq 'Call') {
@@ -246,6 +251,12 @@ sub _infer_expr_type ($n, $env, $subs, $errs) {
     # Only support direct name calls in slice 1.
     if ($callee && ref($callee) eq 'HASH' && ($callee->{kind} // '') eq 'Name') {
       my $name = $callee->{name};
+
+      # Built-in noreturn calls: treat as Never.
+      if (_name_is_noreturn($name)) {
+        return _set_type($n, { kind => 'TypeName', name => 'Never' });
+      }
+
       my $sig  = $subs->{$name};
       if ($sig) {
         my $want = scalar @{ $sig->{params} // [] };
@@ -256,12 +267,13 @@ sub _infer_expr_type ($n, $env, $subs, $errs) {
           for (my $i=0; $i<$want; $i++) {
             my $pt = $sig->{params}[$i];
             my $at = _infer_expr_type($n->{args}[$i], $env, $subs, $errs);
-            if ($pt && $at && !_type_eq($pt, $at)) {
+            # Never is bottom: passing a Never expression as an argument is always type-compatible.
+            if ($pt && $at && !_type_is_never($at) && !_type_eq($pt, $at)) {
               _err($errs, $n->{args}[$i], "call arg type mismatch for $name arg ".($i+1).": expected "._type_str($pt).", got "._type_str($at));
             }
           }
         }
-        return $sig->{ret};
+        return _set_type($n, $sig->{ret});
       }
     }
     return undef;
@@ -277,19 +289,26 @@ if ($k eq 'BinOp') {
   if ($op eq 'and' || $op eq 'or') {
     my $lt = _infer_expr_type($lhs, $env, $subs, $errs);
     my $rt = _infer_expr_type($rhs, $env, $subs, $errs);
+
+    # Short-circuit semantics: if LHS never returns, whole expr never returns.
+    return _set_type($n, { kind => 'TypeName', name => 'Never' }) if _type_is_never($lt);
+
     if ($lt && !_type_eq($lt, { kind => 'TypeName', name => 'Bool' })) {
       _err($errs, $lhs, "'$op' operand must be Bool");
     }
     if ($rt && !_type_eq($rt, { kind => 'TypeName', name => 'Bool' })) {
       _err($errs, $rhs, "'$op' operand must be Bool");
     }
-    return { kind => 'TypeName', name => 'Bool' };
+    return _set_type($n, { kind => 'TypeName', name => 'Bool' });
   }
 
   # Comparisons
   if ($op =~ /^(==|!=|<|<=|>|>=)$/) {
     my $lt = _infer_expr_type($lhs, $env, $subs, $errs);
     my $rt = _infer_expr_type($rhs, $env, $subs, $errs);
+
+    # Strict eval: if either operand never returns, comparison never returns.
+    return _set_type($n, { kind => 'TypeName', name => 'Never' }) if _type_is_never($lt) || _type_is_never($rt);
 
     # No inference: only check if both operand types are known.
     if ($lt && $rt) {
@@ -303,13 +322,15 @@ if ($k eq 'BinOp') {
       }
     }
 
-    return { kind => 'TypeName', name => 'Bool' };
+    return _set_type($n, { kind => 'TypeName', name => 'Bool' });
   }
 
   # Numeric operators
   if ($op =~ /^(\+|-|\*|\/|%)$/) {
     my $lt = _infer_expr_type($lhs, $env, $subs, $errs);
     my $rt = _infer_expr_type($rhs, $env, $subs, $errs);
+
+    return _set_type($n, { kind => 'TypeName', name => 'Never' }) if _type_is_never($lt) || _type_is_never($rt);
 
     # No inference: only check if both operand types are known.
     return undef if !$lt || !$rt;
@@ -321,7 +342,7 @@ if ($k eq 'BinOp') {
 
     my $tn = _type_str($lt);
     if (_is_int_type($lt)) {
-      return $lt;
+      return _set_type($n, $lt);
     }
 
     if ($tn eq 'Float') {
@@ -329,7 +350,7 @@ if ($k eq 'BinOp') {
         _err($errs, $n, "operator '%' not supported for type Float");
         return undef;
       }
-      return $lt;
+      return _set_type($n, $lt);
     }
 
     _err($errs, $n, "operator '$op' not supported for type $tn");
@@ -344,10 +365,11 @@ if ($k eq 'Unary') {
   if ($op eq 'not') {
     my $inner = $n->{expr};
     my $it = _infer_expr_type($inner, $env, $subs, $errs);
+    return _set_type($n, { kind => 'TypeName', name => 'Never' }) if _type_is_never($it);
     if ($it && !_type_eq($it, { kind => 'TypeName', name => 'Bool' })) {
       _err($errs, $inner, "'not' operand must be Bool");
     }
-    return { kind => 'TypeName', name => 'Bool' };
+    return _set_type($n, { kind => 'TypeName', name => 'Bool' });
   }
 
   if ($op eq '-') {
@@ -355,8 +377,11 @@ if ($k eq 'Unary') {
     my $it = _infer_expr_type($inner, $env, $subs, $errs);
     return undef if !$it;
 
+    return _set_type($n, { kind => 'TypeName', name => 'Never' }) if _type_is_never($it);
+    return _set_type($n, { kind => 'TypeName', name => 'Never' }) if _type_is_never($it);
+
     my $tn = _type_str($it);
-    return $it if _is_int_type($it) || $tn eq 'Float';
+    return _set_type($n, $it) if _is_int_type($it) || $tn eq 'Float';
 
     _err($errs, $inner, "unary '-' operand must be an integer or Float");
     return undef;
@@ -364,10 +389,10 @@ if ($k eq 'Unary') {
   return undef;
 }
 
-  if ($k eq 'LitBool') { return { kind => 'TypeName', name => 'Bool' }; }
-  if ($k eq 'LitInt')  { return { kind => 'TypeName', name => 'int'  }; }
-  if ($k eq 'LitFloat'){ return { kind => 'TypeName', name => 'Float'}; }
-  if ($k eq 'LitStr')  { return { kind => 'TypeName', name => 'Str'  }; }
+  if ($k eq 'LitBool') { return _set_type($n, { kind => 'TypeName', name => 'Bool' }); }
+  if ($k eq 'LitInt')  { return _set_type($n, { kind => 'TypeName', name => 'int'  }); }
+  if ($k eq 'LitFloat'){ return _set_type($n, { kind => 'TypeName', name => 'Float'}); }
+  if ($k eq 'LitStr')  { return _set_type($n, { kind => 'TypeName', name => 'Str'  }); }
 
   if ($k eq 'Block') {
     _walk_block($n, $env, $subs, $errs, undef);
@@ -402,6 +427,13 @@ if ($k eq 'Unary') {
 sub _canon_type_name ($name) {
   return 'int' if defined($name) && $name eq 'Int'; # legacy alias
   return $name;
+}
+
+sub _type_is_never ($t) {
+  return 0 if !$t || ref($t) ne 'HASH';
+  return 0 if ($t->{kind} // '') ne 'TypeName';
+  return 1 if (_canon_type_name($t->{name}) // '') eq 'Never';
+  return 0;
 }
 
 sub _is_bool_type ($t) {
@@ -456,8 +488,25 @@ sub _type_eq ($a, $b) {
 
 sub _check_assign_compat ($node, $lhs_t, $rhs_t, $errs, $what) {
   return if !$lhs_t || !$rhs_t;           # no inference: only check when both known
+  return if _type_is_never($rhs_t);       # Never can flow to any type (bottom type)
   return if _type_eq($lhs_t, $rhs_t);
   _err($errs, $node, "$what type mismatch: expected "._type_str($lhs_t).", got "._type_str($rhs_t));
+}
+
+sub _set_type ($node, $t) {
+  return $t if !$node || ref($node) ne 'HASH' || !$t;
+  $node->{_type} = $t;
+  return $t;
+}
+
+sub _name_is_noreturn ($name) {
+  $name //= '';
+  return 1 if $name eq '__panic' || $name eq 'panic';
+  return 1 if $name eq 'std::core::Assert::panic';
+  return 1 if $name eq 'std::prelude::panic';
+  return 1 if $name =~ /::panic\z/;
+  return 1 if $name =~ /::abort\z/;
+  return 0;
 }
 
 # -------------

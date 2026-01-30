@@ -18,7 +18,7 @@ my %KW = map { $_ => 1 } qw(
   break continue return
   and or not
   true false
-  Void Int Bool Str int int8 int16 int32 int64 uint uint8 uint16 uint32 uint64
+  Void Never Int Bool Str int int8 int16 int32 int64 uint uint8 uint16 uint32 uint64
 );
 
 sub new ($class, %args) {
