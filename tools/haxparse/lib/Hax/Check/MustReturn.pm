@@ -33,7 +33,7 @@ sub check_module ($mod_ast) {
 sub _type_is_void ($t) {
   return 1 if !$t || ref($t) ne 'HASH';
   my $k = $t->{kind} // '';
-  return 1 if $k eq 'TypeName' && ($t->{name} // '') eq 'Void';
+  return 1 if $k eq 'TypeName' && (($t->{name} // '') eq 'Void' || ($t->{name} // '') eq 'Unit');
   return 0;
 }
 

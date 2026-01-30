@@ -4,7 +4,7 @@ use v5.36;
 use strict;
 use warnings;
 
-our $VERSION = '0.002';
+our $VERSION = '0.003';
 
 # Conservative unreachable-code checker for Hax v0.1.
 # Flags statements after an unconditional terminator (return or panic-like call)
@@ -13,7 +13,8 @@ our $VERSION = '0.002';
 # Notes:
 # - We do not assume `case` without `else` is exhaustive (type info not available here).
 # - We treat these calls as "noreturn" for unreachable detection:
-#     __panic(...), panic(...), std::core::Assert::panic(...), std::prelude::panic(...)
+#     __panic(...), panic(...), any fully-qualified *::panic(...)
+#     (and a small allowlist for older spellings).
 
 sub check_module ($mod_ast) {
   my @errs;
@@ -63,32 +64,46 @@ sub _check_block ($blk, $errs) {
 }
 
 sub _stmt_terminates ($st) {
-  my $k = $st->{kind} // '';
-  return 1 if $k eq 'Return';
+my $k = $st->{kind} // '';
+return 1 if $k eq 'Return';
 
-  if ($k eq 'ExprStmt') {
-    return _expr_is_panic_call($st->{expr});
-  }
+if ($k eq 'VarDecl') {
+  # If the initializer is a noreturn call, the declaration terminates the block.
+  return _expr_is_noreturn_call($st->{init});
+}
 
-  if ($k eq 'Assign') {
-    return _expr_is_panic_call($st->{rhs});
-  }
+if ($k eq 'ExprStmt') {
+  return _expr_is_noreturn_call($st->{expr});
+}
 
-  if ($k eq 'If') {
-    return 0 unless $st->{else};
-    return _block_terminates($st->{then}) && _block_terminates($st->{else});
-  }
+if ($k eq 'Assign') {
+  return _expr_is_noreturn_call($st->{rhs});
+}
 
-  if ($k eq 'Case') {
-    # Conservative: only terminating if there is an else and all branches terminate.
-    return 0 unless $st->{else};
-    for my $w (@{ $st->{whens} // [] }) {
-      return 0 unless _block_terminates($w->{body});
-    }
-    return _block_terminates($st->{else});
-  }
+if ($k eq 'If') {
+  # If evaluating the condition never returns, the whole statement terminates.
+  return 1 if _expr_is_noreturn_call($st->{cond});
 
+  return 0 unless $st->{else};
+  return _block_terminates($st->{then}) && _block_terminates($st->{else});
+}
+
+if ($k eq 'While') {
+  return 1 if _expr_is_noreturn_call($st->{cond});
   return 0;
+}
+
+if ($k eq 'Case') {
+  # Conservative: only terminating if there is an else and all branches terminate.
+  return 0 unless $st->{else};
+  for my $w (@{ $st->{whens} // [] }) {
+    return 0 unless _block_terminates($w->{body});
+  }
+  return _block_terminates($st->{else});
+}
+
+return 0;
+
 }
 
 sub _block_terminates ($blk) {
@@ -99,22 +114,35 @@ sub _block_terminates ($blk) {
   return _stmt_terminates($stmts->[-1]);
 }
 
-sub _expr_is_panic_call ($e) {
+sub _expr_is_noreturn_call ($e) {
+\
   return 0 if !$e || ref($e) ne 'HASH';
-  return 0 if ($e->{kind} // '') ne 'Call';
 
-  my $callee = $e->{callee};
-  return 0 if !$callee || ref($callee) ne 'HASH';
-  return 0 unless ($callee->{kind} // '') eq 'Name';
+  # Recognize a direct call expression.
+  if (($e->{kind} // '') eq 'Call') {
+    my $callee = $e->{callee};
+    return 0 if !$callee || ref($callee) ne 'HASH';
+    return 0 unless ($callee->{kind} // '') eq 'Name';
 
-  my $name = $callee->{name} // '';
+    my $name = $callee->{name} // '';
 
-  return 1 if $name eq '__panic';
-  return 1 if $name eq 'panic';
-  return 1 if $name eq 'std::core::Assert::panic';
-  return 1 if $name eq 'std::prelude::panic';
+    # Historical spellings.
+    return 1 if $name eq '__panic';
+    return 1 if $name eq 'panic';
+    return 1 if $name eq 'std::core::Assert::panic';
+    return 1 if $name eq 'std::prelude::panic';
+
+    # General rule: any fully-qualified *::panic is noreturn.
+    return 1 if $name =~ /::panic\z/;
+
+    # Future hook: abort/fatal, if you add them.
+    return 1 if $name =~ /::abort\z/;
+
+    return 0;
+  }
 
   return 0;
+
 }
 
 sub _mk_err ($node, $msg) {

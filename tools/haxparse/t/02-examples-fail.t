@@ -35,9 +35,23 @@ my %must_fail_now = map { $_ => 1 } qw(
   case_payload_type_mismatch.hax
   case_binder_scope_leak.hax
   assign_type_mismatch.hax
+  assign_eq_type_mismatch.hax
+  assign_undefined_var.hax
+  assign_nonvar_lhs.hax
+  assign_bind_requires_ref.hax
+  if_requires_bool.hax
   return_type_mismatch.hax
+  return_missing.hax
+  return_bare_nonvoid.hax
+  return_value_in_void.hax
   call_arity_mismatch.hax
   call_arg_type_mismatch.hax
+  numop_bad_type.hax
+  numop_float_mod.hax
+  numop_mixed_signed.hax
+  numop_mixed_size.hax
+  unreachable_after_return.hax
+  unreachable_after_panic_vardecl.hax
 );
 
 for my $f (@files) {

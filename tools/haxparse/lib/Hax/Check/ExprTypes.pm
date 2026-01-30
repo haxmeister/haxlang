@@ -120,37 +120,70 @@ sub _walk_stmt ($n, $env, $subs, $errs, $ret_type) {
   }
 
   if ($k eq 'Assign') {
-    # We only enforce := (rebind) for now; '=' may be statement-only depending on your grammar.
-    return if ($n->{op} // '') ne ':=';
+    my $op = $n->{op} // '';
+
+    # '=' is regular assignment.
+    # ':=' is the *binding* operator and is only valid for reference variables (sigil '^').
+    return if $op ne '=' && $op ne ':=';
 
     my $lhs = $n->{lhs};
     my $rhs = $n->{rhs};
 
     # Only support var LHS in slice 1.
-    if ($lhs && ref($lhs) eq 'HASH' && ($lhs->{kind} // '') eq 'Var') {
-      my $lhs_t = _env_lookup($env, $lhs->{sigil}, $lhs->{name});
-      my $rhs_t = _infer_expr_type($rhs, $env, $subs, $errs);
-      _check_assign_compat($n, $lhs_t, $rhs_t, $errs, "assignment");
+    if (!$lhs || ref($lhs) ne 'HASH' || ($lhs->{kind} // '') ne 'Var') {
+      _err($errs, $n, "assignment lhs must be a variable");
+      return;
     }
+
+    if ($op eq ':=' && ($lhs->{sigil} // '') ne '^') {
+      _err($errs, $n, "binding operator ':=' is only allowed for reference variables (^name)");
+      return;
+    }
+
+    my $lhs_t = _env_lookup($env, $lhs->{sigil}, $lhs->{name});
+    if (!$lhs_t) {
+      _err($errs, $lhs, "undefined variable $lhs->{sigil}$lhs->{name}");
+      return;
+    }
+
+    my $rhs_t = _infer_expr_type($rhs, $env, $subs, $errs);
+    _check_assign_compat($n, $lhs_t, $rhs_t, $errs, "assignment");
     return;
   }
 
+
   if ($k eq 'Return') {
-    return if !$n->{expr};
+    if (!defined $n->{expr}) {
+      if (!_type_is_void($ret_type)) {
+        _err($errs, $n, "bare return in non-Void function");
+      }
+      return;
+    }
+
     my $expr_t = _infer_expr_type($n->{expr}, $env, $subs, $errs);
+    if (_type_is_void($ret_type)) {
+      _err($errs, $n, "return with value in Void function");
+      return;
+    }
     _check_assign_compat($n, $ret_type, $expr_t, $errs, "return");
     return;
   }
 
   if ($k eq 'If') {
-    _infer_expr_type($n->{cond}, $env, $subs, $errs);
+    my $cond_t = _infer_expr_type($n->{cond}, $env, $subs, $errs);
+    if ($cond_t && !_is_bool_type($cond_t)) {
+      _err($errs, $n->{cond}, "if condition must be Bool, got " . _type_str($cond_t));
+    }
     _walk_block($n->{then}, $env, $subs, $errs, $ret_type);
     _walk_block($n->{else}, $env, $subs, $errs, $ret_type) if $n->{else};
     return;
   }
 
   if ($k eq 'While') {
-    _infer_expr_type($n->{cond}, $env, $subs, $errs);
+    my $cond_t = _infer_expr_type($n->{cond}, $env, $subs, $errs);
+    if ($cond_t && !_is_bool_type($cond_t)) {
+      _err($errs, $n->{cond}, "while condition must be Bool, got " . _type_str($cond_t));
+    }
     _walk_block($n->{body}, $env, $subs, $errs, $ret_type);
     return;
   }
@@ -234,20 +267,105 @@ sub _infer_expr_type ($n, $env, $subs, $errs) {
     return undef;
   }
 
-  if ($k eq 'BinOp') {
-    my $op = $n->{op} // '';
-    if ($op =~ /^(==|!=|<|<=|>|>=)$/) {
-      return { kind => 'TypeName', name => 'Bool' };
+  
+if ($k eq 'BinOp') {
+  my $op  = $n->{op}  // '';
+  my $lhs = $n->{lhs};
+  my $rhs = $n->{rhs};
+
+  # Logical ops (keywords)
+  if ($op eq 'and' || $op eq 'or') {
+    my $lt = _infer_expr_type($lhs, $env, $subs, $errs);
+    my $rt = _infer_expr_type($rhs, $env, $subs, $errs);
+    if ($lt && !_type_eq($lt, { kind => 'TypeName', name => 'Bool' })) {
+      _err($errs, $lhs, "'$op' operand must be Bool");
     }
+    if ($rt && !_type_eq($rt, { kind => 'TypeName', name => 'Bool' })) {
+      _err($errs, $rhs, "'$op' operand must be Bool");
+    }
+    return { kind => 'TypeName', name => 'Bool' };
+  }
+
+  # Comparisons
+  if ($op =~ /^(==|!=|<|<=|>|>=)$/) {
+    my $lt = _infer_expr_type($lhs, $env, $subs, $errs);
+    my $rt = _infer_expr_type($rhs, $env, $subs, $errs);
+
+    # No inference: only check if both operand types are known.
+    if ($lt && $rt) {
+      if (!_type_eq($lt, $rt)) {
+        _err($errs, $n, "cannot compare "._type_str($lt)." $op "._type_str($rt));
+      } elsif ($op =~ /^(<|<=|>|>=)$/) {
+        my $tn = _type_str($lt);
+        if (!_is_int_type($lt) && $tn ne 'Float') {
+          _err($errs, $n, "ordering comparison not supported for type $tn");
+        }
+      }
+    }
+
+    return { kind => 'TypeName', name => 'Bool' };
+  }
+
+  # Numeric operators
+  if ($op =~ /^(\+|-|\*|\/|%)$/) {
+    my $lt = _infer_expr_type($lhs, $env, $subs, $errs);
+    my $rt = _infer_expr_type($rhs, $env, $subs, $errs);
+
+    # No inference: only check if both operand types are known.
+    return undef if !$lt || !$rt;
+
+    if (!_type_eq($lt, $rt)) {
+      _err($errs, $n, "cannot apply '$op' to "._type_str($lt)." and "._type_str($rt));
+      return undef;
+    }
+
+    my $tn = _type_str($lt);
+    if (_is_int_type($lt)) {
+      return $lt;
+    }
+
+    if ($tn eq 'Float') {
+      if ($op eq '%') {
+        _err($errs, $n, "operator '%' not supported for type Float");
+        return undef;
+      }
+      return $lt;
+    }
+
+    _err($errs, $n, "operator '$op' not supported for type $tn");
     return undef;
   }
 
-  if ($k eq 'UnOp') {
+  return undef;
+}
+
+if ($k eq 'Unary') {
+  my $op = $n->{op} // '';
+  if ($op eq 'not') {
+    my $inner = $n->{expr};
+    my $it = _infer_expr_type($inner, $env, $subs, $errs);
+    if ($it && !_type_eq($it, { kind => 'TypeName', name => 'Bool' })) {
+      _err($errs, $inner, "'not' operand must be Bool");
+    }
+    return { kind => 'TypeName', name => 'Bool' };
+  }
+
+  if ($op eq '-') {
+    my $inner = $n->{expr};
+    my $it = _infer_expr_type($inner, $env, $subs, $errs);
+    return undef if !$it;
+
+    my $tn = _type_str($it);
+    return $it if _is_int_type($it) || $tn eq 'Float';
+
+    _err($errs, $inner, "unary '-' operand must be an integer or Float");
     return undef;
   }
+  return undef;
+}
 
   if ($k eq 'LitBool') { return { kind => 'TypeName', name => 'Bool' }; }
-  if ($k eq 'LitInt')  { return { kind => 'TypeName', name => 'Int'  }; }
+  if ($k eq 'LitInt')  { return { kind => 'TypeName', name => 'int'  }; }
   if ($k eq 'LitFloat'){ return { kind => 'TypeName', name => 'Float'}; }
   if ($k eq 'LitStr')  { return { kind => 'TypeName', name => 'Str'  }; }
 
@@ -258,7 +376,10 @@ sub _infer_expr_type ($n, $env, $subs, $errs) {
 
   # Recurse where sensible
   if ($k eq 'If') {
-    _infer_expr_type($n->{cond}, $env, $subs, $errs);
+    my $cond_t = _infer_expr_type($n->{cond}, $env, $subs, $errs);
+    if ($cond_t && !_is_bool_type($cond_t)) {
+      _err($errs, $n->{cond}, "if condition must be Bool, got " . _type_str($cond_t));
+    }
     _walk_block($n->{then}, $env, $subs, $errs, undef);
     _walk_block($n->{else}, $env, $subs, $errs, undef) if $n->{else};
     return undef;
@@ -277,6 +398,40 @@ sub _infer_expr_type ($n, $env, $subs, $errs) {
 # -------------
 # Type helpers
 # -------------
+
+sub _canon_type_name ($name) {
+  return 'int' if defined($name) && $name eq 'Int'; # legacy alias
+  return $name;
+}
+
+sub _is_bool_type ($t) {
+  return 0 if !$t || ref($t) ne 'HASH';
+  return 0 if ($t->{kind} // '') ne 'TypeName';
+  my $n = _canon_type_name($t->{name});
+  return 1 if defined($n) && $n eq 'Bool';
+  return 0;
+}
+
+sub _type_is_void ($t) {
+  return 1 if !$t || ref($t) ne 'HASH';
+  my $k = $t->{kind} // '';
+  return 0 unless $k eq 'TypeName';
+  my $name = $t->{name} // '';
+  return 1 if $name eq 'Void';
+  return 1 if $name eq 'Unit';
+  return 0;
+}
+
+
+sub _is_int_type ($t) {
+  return 0 if !$t || ref($t) ne 'HASH';
+  return 0 if ($t->{kind} // '') ne 'TypeName';
+  my $n = _canon_type_name($t->{name});
+  return 1 if $n eq 'int'  || $n eq 'uint';
+  return 1 if $n =~ /^int(8|16|32|64)$/;
+  return 1 if $n =~ /^uint(8|16|32|64)$/;
+  return 0;
+}
 
 sub _type_str ($t) {
   return "<unknown>" if !$t || ref($t) ne 'HASH';
