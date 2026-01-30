@@ -1,0 +1,14 @@
+
+module ZZZ::NeverOk;
+
+sub f(Bool $b) -> Int {
+  if ($b) {
+    return 1;
+  } else {
+    panic();
+  }
+}
+
+sub main() -> Int {
+  return f(true);
+}
