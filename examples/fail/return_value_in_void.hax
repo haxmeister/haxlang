@@ -1,0 +1,5 @@
+module ZZZ::ReturnValueInVoid;
+
+sub main() -> Void {
+  return 1;
+}

@@ -1,0 +1,9 @@
+module ZZZ::CompareEqTypeMismatch;
+
+sub main() -> Int {
+  var Int $a := 1;
+  var Str $s := "hi";
+
+  if ($a == $s) { }
+  return 0;
+}

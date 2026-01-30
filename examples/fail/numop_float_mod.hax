@@ -1,0 +1,7 @@
+module ZZZ::NumOpFloatMod;
+
+sub main() -> Float {
+  var Float $a := 3.0;
+  var Float $b := 2.0;
+  return $a % $b;
+}

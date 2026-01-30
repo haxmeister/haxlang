@@ -1,0 +1,7 @@
+module ZZZ::NumOpMixedSignedness;
+
+sub main() -> int32 {
+  var int32 $a := 1;
+  var uint32 $b := 2;
+  return $a + $b;
+}

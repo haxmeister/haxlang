@@ -1,0 +1,7 @@
+module ZZZ::NumOpStrAdd;
+
+sub main() -> int {
+  var Str $s := "hi";
+  var int $n := 3;
+  return $n + $s;
+}

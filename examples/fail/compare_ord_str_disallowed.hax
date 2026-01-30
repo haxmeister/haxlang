@@ -1,0 +1,9 @@
+module ZZZ::CompareOrdStrDisallowed;
+
+sub main() -> Int {
+  var Str $a := "a";
+  var Str $b := "b";
+
+  if ($a < $b) { }
+  return 0;
+}

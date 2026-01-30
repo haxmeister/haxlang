@@ -1,0 +1,8 @@
+module ZZZ::ReturnMissing;
+
+sub main() -> Int {
+  if true {
+    return 1;
+  }
+  # missing return on else path
+}

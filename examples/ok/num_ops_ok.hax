@@ -1,0 +1,14 @@
+module ZZZ::NumOpsOk;
+
+sub main() -> int32 {
+  var int32 $a := 10;
+  var int32 $b := 3;
+
+  var int32 $c := $a + $b;
+  var int32 $d := $a - $b;
+  var int32 $e := $a * $b;
+  var int32 $f := $a / $b;
+  var int32 $g := $a % $b;
+
+  return -$c;
+}

@@ -1,0 +1,4 @@
+sub f() -> Void {
+  return;
+  var int $x = 1;
+}

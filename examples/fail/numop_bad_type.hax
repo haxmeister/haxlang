@@ -1,0 +1,6 @@
+module ZZZ::NumOpBadType;
+
+sub main() -> Int {
+  var Bool $b := true;
+  return $b + $b;
+}

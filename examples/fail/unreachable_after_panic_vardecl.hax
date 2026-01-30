@@ -1,0 +1,4 @@
+sub f() -> Void {
+  var int $x = panic();
+  var int $y = 2;
+}

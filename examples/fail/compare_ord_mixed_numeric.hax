@@ -1,0 +1,9 @@
+module ZZZ::CompareOrdMixedNumeric;
+
+sub main() -> Int {
+  var Int $a := 1;
+  var Float $b := 2.0;
+
+  if ($a < $b) { }
+  return 0;
+}

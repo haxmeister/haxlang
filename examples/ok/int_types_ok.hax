@@ -1,0 +1,6 @@
+module IntTypesOk;
+
+pub sub demo(int8 $a, uint8 $b, int16 $c, uint16 $d, int32 $e, uint32 $f, int64 $g, uint64 $h, int $i, uint $j) -> int {
+  -- validate that these type names parse and can be used in signatures --
+  return 0;
+}

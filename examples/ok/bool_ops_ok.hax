@@ -1,0 +1,12 @@
+module ZZZ::BoolOpsOk;
+
+sub main() -> Bool {
+  var Bool $a := true;
+  var Bool $b := false;
+
+  var Bool $x := not $b;
+  var Bool $y := $a and $x;
+  var Bool $z := $y or $b;
+
+  return $z;
+}

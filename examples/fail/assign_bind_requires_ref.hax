@@ -1,0 +1,7 @@
+module ZZZ::AssignBindRequiresRef;
+
+sub main() -> Int {
+  var Int $x := 1;
+  $x := 2; -- ':=' is binding, only allowed for reference variables
+  return $x;
+}
