@@ -52,6 +52,9 @@ my %must_fail_now = map { $_ => 1 } qw(
   numop_mixed_size.hax
   unreachable_after_return.hax
   unreachable_after_panic_vardecl.hax
+  unreachable_if_cond_never.hax
+  unreachable_case_scrut_never.hax
+  unreachable_after_case_total_enum.hax
 );
 
 for my $f (@files) {

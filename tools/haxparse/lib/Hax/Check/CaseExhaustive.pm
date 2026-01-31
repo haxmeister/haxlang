@@ -133,8 +133,11 @@ sub _walk_expr ($e, $env, $mod_ast, $alias_to_mod, $std_root, $enum_cache, $errs
 }
 
 sub _check_case ($case, $env, $mod_ast, $alias_to_mod, $std_root, $enum_cache, $errs) {
-  # If there's an else arm, we consider it exhaustive for now.
-  return if $case->{else};
+  # If there's an else arm, we consider it exhaustive.
+  if ($case->{else}) {
+    $case->{_exhaustive} = 1;
+    return;
+  }
 
   my $scrut = $case->{expr};
   return unless ref($scrut) eq 'HASH';
@@ -160,7 +163,10 @@ sub _check_case ($case, $env, $mod_ast, $alias_to_mod, $std_root, $enum_cache, $
   }
 
   my @missing = sort grep { !$seen{$_} } keys %$variants;
-  return if !@missing;
+  if (!@missing) {
+    $case->{_exhaustive} = 1;
+    return;
+  }
 
   push @$errs, _mk_err($case, "case over enum must be exhaustive (missing: " . join(', ', @missing) . ")");
 }

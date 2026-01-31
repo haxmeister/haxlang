@@ -1,0 +1,22 @@
+module examples::mustreturn_case_exhaustive;
+
+import std::prelude;
+import std::core::Option as Option;
+
+sub get_or_zero(Option::Option[Int] $x) -> Int {
+  case ($x) {
+    when Some(Int $n) {
+      return $n;
+    }
+    when None {
+      return 0;
+    }
+  }
+}
+
+pub sub main() -> Int {
+  var Option::Option[Int] $x = Option::None;
+  var Int $v = get_or_zero($x);
+  assert($v == 0, "mustreturn_case_exhaustive failed");
+  return 0;
+}

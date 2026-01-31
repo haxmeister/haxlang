@@ -114,12 +114,12 @@ sub _stmt_must_terminate ($st) {
   }
 
   if ($k eq 'Case') {
-    # Without type info, require else to consider it total.
-    return 0 unless $st->{else};
+    # Total if either there is an else arm, or CaseExhaustive proved an enum case is exhaustive.
+    return 0 unless ($st->{else} || $st->{_exhaustive});
     for my $w (@{ $st->{whens} // [] }) {
       return 0 unless _block_must_terminate($w->{body});
     }
-    return _block_must_terminate($st->{else});
+    return $st->{else} ? _block_must_terminate($st->{else}) : 1;
   }
 
   return 0;

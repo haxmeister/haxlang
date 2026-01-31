@@ -1,0 +1,14 @@
+module examples::unreachable_if_cond_never;
+
+import std::prelude;
+
+pub sub main() -> Void {
+  if (panic("boom")) {
+    println("unreachable then");
+    println("also unreachable then");
+  } else {
+    println("unreachable else");
+  }
+
+  println("unreachable after if");
+}

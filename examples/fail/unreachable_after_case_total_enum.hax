@@ -1,0 +1,19 @@
+module examples::unreachable_after_case_total_enum;
+
+import std::prelude;
+import std::core::Option as Option;
+
+pub sub main() -> Void {
+  var Option::Option[Int] $x = Option::None;
+
+  case ($x) {
+    when Some(Int $n) {
+      return;
+    }
+    when None {
+      return;
+    }
+  }
+
+  println("this is unreachable");
+}
