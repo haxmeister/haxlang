@@ -4,7 +4,7 @@ use v5.36;
 use strict;
 use warnings;
 
-our $VERSION = '0.006';
+our $VERSION = '0.007';
 
 # Unreachable-code checker for Hax v0.1.
 #
@@ -41,14 +41,19 @@ sub _check_block ($blk, $errs, $outer_dead = 0) {
   my $terminated    = 0;
   my $dead_reported = 0;
   my $term_reason   = '';
+  my $term_node;
 
   for my $st (@{ $blk->{stmts} // [] }) {
     next if !$st || ref($st) ne 'HASH';
 
     if ($terminated) {
       if (!$dead_reported) {
-        my $why = length($term_reason) ? " ($term_reason)" : '';
-        push @$errs, _mk_err($st, "unreachable statement$why");
+        # Prefer pointing at the *terminator* (return/if/case/never-expr)
+        # rather than the first unreachable statement. Editors typically
+        # underline the construct that caused the dead region.
+        my $why   = length($term_reason) ? " ($term_reason)" : '';
+        my $where = $term_node // $st;
+        push @$errs, _mk_err($where, "unreachable code$why");
         $dead_reported = 1;
       }
       next; # suppress duplicates inside this dead region
@@ -80,6 +85,7 @@ sub _check_block ($blk, $errs, $outer_dead = 0) {
     if ($term) {
       $terminated  = 1;
       $term_reason = $reason // '';
+      $term_node   = $st;
       next;
     }
   }

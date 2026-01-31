@@ -1,10 +1,29 @@
 (*
   Hax Language Grammar (EBNF)
   Version: v0.1
-  Status: Draft (syntax locked for current design)
-  Notes:
-  - Lexing handles comments -- ... --, strings, numbers, keywords.
+  Status: Frozen
+
+  This file is normative for the v0.1 syntax. Any syntax changes MUST bump the
+  language version and update this grammar accordingly.
+
+  Lexical notes:
+  - Comments are delimited by -- ... -- and may span multiple lines.
+  - String literals include double-quoted (with escapes) and single-quoted
+    (no escapes); both are tokenized as STR_LIT.
+  - Hash key/value pairs use =>.
+
+  Operator precedence (highest to lowest), with left-associativity for binary
+  operators unless stated otherwise:
+    1. postfix: call (), index [] {}, member .
+    2. unary: not, unary -
+    3. multiplicative: *, /, %
+    4. additive: +, -
+    5. relational: <, <=, >, >=
+    6. equality: ==, !=
+    7. logical and: and
+    8. logical or: or
 *)
+
 
 file        ::= module_decl imports? top_decl* EOF ;
 

@@ -8,3 +8,4 @@
 - References via `^` variables; `:=` binding/rebinding for local `^` vars; forbidden for `^` params.
 - `and`/`or`/`not` logical operators.
 - Block comments `-- ... --` and Perl-like single-quoted raw strings.
+- Grammar frozen for v0.1 (EBNF is normative).
