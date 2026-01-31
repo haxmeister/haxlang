@@ -176,6 +176,30 @@ Type inference:
 - `^` parameters are by reference (aliasing) and require explicit types.
 - Passing by reference requires `addr(...)` at the call site.
 
+## I/O and effects
+
+In v0.1, I/O is expressed purely as **ordinary function calls** provided by the
+standard library and/or runtime intrinsics.
+
+Rules:
+
+- There is no special effect typing in v0.1.
+- Side effects occur only by calling library functions; the language core does
+  not introduce implicit I/O.
+- Operations that may fail must surface failure explicitly, typically via
+  `Result[T, E]`.
+
+### Minimal `std::io` surface (v0.1)
+
+The v0.1 standard library specifies a small, whole-operation I/O API:
+
+- `std::io::print(Str) -> Void` writes to standard output.
+- `std::io::eprint(Str) -> Void` writes to standard error.
+- `std::io::read_file(Str) -> Result[Str, IoError]` reads an entire file.
+- `std::io::write_file(Str, Str) -> Result[Int, IoError]` writes an entire file and returns the number of bytes written.
+
+`open()` and streaming/partial I/O are intentionally deferred until after v0.1.
+
 ## Control flow
 
 Control-flow forms are statements (not expressions) in v0.1:

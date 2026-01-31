@@ -1,0 +1,9 @@
+module examples::io_print;
+
+import std::prelude;
+
+pub sub main() -> Void {
+  std::io::print("hello stdout\n");
+  std::io::eprint("hello stderr\n");
+  println("io_print ok");
+}

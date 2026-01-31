@@ -1,0 +1,20 @@
+module examples::io_write_file;
+
+import std::prelude;
+import std::core::Result as Result;
+
+pub sub main() -> Void {
+  var Str $data = "hello file\n";
+  var Result::Result[Int, std::io::IoError] $r = std::io::write_file("/tmp/hax_io_test.txt", $data);
+
+  case ($r) {
+    when Ok(Int $n) {
+      assert($n > 0, "write_file wrote 0 bytes");
+    }
+    when Err(std::io::IoError $e) {
+      std::io::eprint("write_file failed\n");
+    }
+  }
+
+  println("io_write_file ok");
+}
