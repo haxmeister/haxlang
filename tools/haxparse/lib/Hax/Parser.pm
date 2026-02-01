@@ -6,7 +6,7 @@ use warnings;
 
 use Hax::AST qw(node span);
 
-our $VERSION = '0.004';
+our $VERSION = '0.005';
 
 sub new ($class, %args) {
   my $lex = $args{lexer} // die "lexer required";
@@ -44,6 +44,24 @@ sub _peek_op ($self, $op) { $self->_peek('OP', $op) }
 
 sub parse ($self) {
   return $self->parse_module;
+}
+
+# Program/root parse: module header is optional.
+# If absent, the file is treated as an anonymous root module.
+sub parse_program ($self) {
+  return $self->parse_module if $self->_peek_kw('module');
+  return $self->parse_implicit_module;
+}
+
+sub parse_implicit_module ($self) {
+  my $t0 = $self->{cur};
+  my @items;
+  while (!$self->_peek('EOF')) {
+    push @items, $self->parse_item;
+  }
+
+  # Name is informational; the program root is chosen by CLI path.
+  return node('Module', span($t0, $t0), name => '__root__', items => \@items);
 }
 
 sub parse_module ($self) {

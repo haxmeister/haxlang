@@ -61,7 +61,7 @@ sub parse_and_check_program ($path, %opts) {
 
   my $lex = Hax::Lexer->new(file => $path, src => $src);
   my $p   = Hax::Parser->new(lexer => $lex);
-  my $ast = $p->parse;  # dies on syntax error
+  my $ast = $p->parse_program;  # dies on syntax error
 
   _die_first_err(Hax::Check::Imports::check_module($ast));
   _die_first_err(Hax::Check::ImportCollision::check_module($ast));

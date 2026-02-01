@@ -61,10 +61,13 @@ sub _type_is_one_of ($t, @names) {
 }
 
 sub _mk_err ($node, $msg) {
-  my $file = $node->{file} // '<unknown>';
-  my $line = $node->{line} // 0;
-  my $col  = $node->{col}  // 0;
-  return { msg => $msg, file => $file, line => $line, col => $col };
+  my $sp = $node->{span} || {};
+  return {
+    msg  => $msg,
+    file => $sp->{file}  // '<unknown>',
+    line => $sp->{sline} // 0,
+    col  => $sp->{scol}  // 0,
+  };
 }
 
 1;

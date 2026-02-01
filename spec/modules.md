@@ -10,6 +10,9 @@ A program is checked/compiled starting from a single *root source file path*.
 * The root file is the compilation entry.
 * The program entrypoint `main` (Rule B) is searched for in the module defined
   by the root file.
+* The root file may omit a `module ...` declaration. In that case, the root
+  file is treated as an anonymous root module and `main` must appear in that
+  file.
 * If the root file contains a `module Foo::Bar` declaration, the root module
   name is `Foo::Bar` and `main` must appear in that module (i.e. in that file).
 * The root file path is still the starting point for module search (see
