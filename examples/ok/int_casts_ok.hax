@@ -1,0 +1,13 @@
+module IntCastsOk;
+
+pub sub demo() -> int32 {
+  return int32(0);
+}
+
+pub sub widen(int8 $a) -> int32 {
+  return int32($a);
+}
+
+pub sub to_uint(uint16 $u) -> uint32 {
+  return uint32($u);
+}

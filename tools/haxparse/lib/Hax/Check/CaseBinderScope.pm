@@ -125,7 +125,12 @@ sub _check_stmt ($st, $scopes, $errs) {
       # bind pattern vars into arm-local scope
       my $pat = $w->{pat};
       if ($pat && ref($pat) eq 'HASH' && (($pat->{kind} // '') eq 'PatternVariant')) {
-        for my $b (@{ $pat->{binds} // [] }) {
+        # PatternVariant currently supports a single binder (bind) but older
+        # code paths used an array (binds). Support both.
+        my @binds;
+        push @binds, @{ $pat->{binds} } if ref($pat->{binds}) eq 'ARRAY';
+        push @binds, $pat->{bind} if ref($pat->{bind}) eq 'HASH';
+        for my $b (@binds) {
           next if !$b || ref($b) ne 'HASH';
           next if (($b->{kind} // '') ne 'PatBind');
           _bind($b->{sigil}, $b->{name}, \@arm_scopes);
@@ -193,7 +198,10 @@ sub _check_expr ($e, $scopes, $errs) {
       push @arm_scopes, {};
       my $pat = $w->{pat};
       if ($pat && ref($pat) eq 'HASH' && (($pat->{kind} // '') eq 'PatternVariant')) {
-        for my $b (@{ $pat->{binds} // [] }) {
+        my @binds;
+        push @binds, @{ $pat->{binds} } if ref($pat->{binds}) eq 'ARRAY';
+        push @binds, $pat->{bind} if ref($pat->{bind}) eq 'HASH';
+        for my $b (@binds) {
           next if !$b || ref($b) ne 'HASH';
           next if (($b->{kind} // '') ne 'PatBind');
           _bind($b->{sigil}, $b->{name}, \@arm_scopes);

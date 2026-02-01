@@ -96,6 +96,16 @@ For v0.1, type checking is strict equality **except** for `Never`:
 
 No other implicit conversions are performed.
 
+Explicit integer conversions are available via builtin cast functions named after
+the target integer type:
+
+- `int8(x)`, `int16(x)`, `int32(x)`, `int64(x)`
+- `uint8(x)`, `uint16(x)`, `uint32(x)`, `uint64(x)`
+- `int(x)`, `uint(x)`
+
+Each cast takes exactly one argument of an integer type and returns the target
+integer type.
+
 ### Control-flow effects
 Any statement whose evaluation is of type `Never` is a *terminator* for the
 current control-flow path:

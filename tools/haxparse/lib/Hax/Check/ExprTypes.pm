@@ -4,7 +4,7 @@ use v5.36;
 use strict;
 use warnings;
 
-our $VERSION = '0.001';
+our $VERSION = '0.002';
 
 # ExprTypes (slice 1)
 #
@@ -252,6 +252,25 @@ sub _infer_expr_type ($n, $env, $subs, $errs) {
     if ($callee && ref($callee) eq 'HASH' && ($callee->{kind} // '') eq 'Name') {
       my $name = $callee->{name};
 
+      # Built-in integer conversion calls.
+      # These are treated as pure casts with 1 arg.
+      # We intentionally model them here (checker-known) so code can write:
+      #   return int32(0);
+      # without needing an explicit stdlib declaration or import.
+      if (my $cast_t = _name_is_int_cast($name)) {
+        my $want = 1;
+        my $got  = scalar @{ $n->{args} // [] };
+        if ($want != $got) {
+          _err($errs, $n, "call arity mismatch: $name expects 1 arg, got $got");
+        } else {
+          my $at = _infer_expr_type($n->{args}[0], $env, $subs, $errs);
+          if ($at && !_type_is_never($at) && !_is_int_type($at)) {
+            _err($errs, $n->{args}[0], "call arg type mismatch for $name: expected an integer type, got " . _type_str($at));
+          }
+        }
+        return _set_type($n, $cast_t);
+      }
+
       # Built-in noreturn calls: treat as Never.
       if (_name_is_noreturn($name)) {
         return _set_type($n, { kind => 'TypeName', name => 'Never' });
@@ -468,7 +487,14 @@ sub _is_int_type ($t) {
 sub _type_str ($t) {
   return "<unknown>" if !$t || ref($t) ne 'HASH';
   my $k = $t->{kind} // '';
-  return $t->{name} if $k eq 'TypeName';
+  if ($k eq 'TypeName') {
+    my $n = $t->{name};
+    # Canonicalize legacy aliases used throughout examples/spec.
+    return 'int'  if defined($n) && $n eq 'Int';
+    return 'uint' if defined($n) && $n eq 'Uint';
+    return 'Void' if defined($n) && $n eq 'Unit';
+    return $n;
+  }
   if ($k eq 'TypeArray') {
     return "[" . _type_str($t->{elem}) . "]";
   }
@@ -507,6 +533,17 @@ sub _name_is_noreturn ($name) {
   return 1 if $name =~ /::panic\z/;
   return 1 if $name =~ /::abort\z/;
   return 0;
+}
+
+sub _name_is_int_cast ($name) {
+  return undef if !defined $name;
+  # Accept primitive integer type names as cast functions.
+  # These are checker-known and do not require an import or declaration.
+  $name = _canon_type_name($name);
+  return { kind => 'TypeName', name => $name } if $name eq 'int'  || $name eq 'uint';
+  return { kind => 'TypeName', name => $name } if $name =~ /^int(8|16|32|64)$/;
+  return { kind => 'TypeName', name => $name } if $name =~ /^uint(8|16|32|64)$/;
+  return undef;
 }
 
 # -------------

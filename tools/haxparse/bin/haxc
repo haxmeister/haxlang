@@ -34,6 +34,7 @@ usage:
 options:
   -I <dir>     Add an import root (may be repeated)
   --std <dir>  Set standard library root (default: std)
+  --lib        Check as a library/module (skip entrypoint validation)
 
 notes:
   * The directory containing the root file is always searched first for imports.
@@ -56,6 +57,7 @@ sub _die_first_err (@errs) {
 sub parse_and_check_program ($path, %opts) {
   my $std_root = $opts{std_root} // 'std';
   my $include  = $opts{include}  // [];
+  my $is_lib   = $opts{is_lib}   // 0;
 
   my $src = slurp_utf8($path);
 
@@ -77,18 +79,20 @@ sub parse_and_check_program ($path, %opts) {
   _die_first_err(Hax::Check::Unreachable::check_module($ast));
   _die_first_err(Hax::Check::MustReturn::check_module($ast));
 
-  _die_first_err(Hax::Check::Entrypoint::check_program($ast));
+  _die_first_err(Hax::Check::Entrypoint::check_program($ast)) if !$is_lib;
   return 1;
 }
 
 sub cmd_check (@args) {
   my @I;
   my $std_root = 'std';
+  my $lib = 0;
 
   my $ok = GetOptionsFromArray(
     \@args,
     'I=s@'   => \@I,
     'std=s'  => \$std_root,
+    'lib!'   => \$lib,
     'h|help' => sub { usage() },
   );
 
@@ -114,7 +118,7 @@ sub cmd_check (@args) {
     my $root_dir = dirname($path);
     my @include = ($root_dir, @I);
 
-    eval { parse_and_check_program($path, std_root => $std_root, include => \@include); 1 } or do {
+    eval { parse_and_check_program($path, std_root => $std_root, include => \@include, is_lib => $lib); 1 } or do {
       chomp(my $err = $@ || 'error');
       print "NOT OK  $path\n$err\n";
       $bad++;

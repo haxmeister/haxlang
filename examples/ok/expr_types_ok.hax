@@ -5,9 +5,9 @@ sub takes2(Int $a, Bool $b) -> Int {
 }
 
 sub main() -> Int {
-  var Int $x := 1;
-  var Bool $b := true;
+  var Int $x = 1;
+  var Bool $b = true;
 
-  $x := takes2($x, $b);
+  $x = takes2($x, $b);
   return $x;
 }

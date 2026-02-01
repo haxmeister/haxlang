@@ -1,21 +1,17 @@
-use v5.36;
 use strict;
 use warnings;
 
 use Test::More;
+use FindBin qw($Bin);
+use File::Spec;
+use Cwd qw(abs_path);
 
-# This test ensures that stdlib imports resolve cleanly through the
-# front-end pipeline (ResolveImports + from-import symbol checking).
+my $ROOT = abs_path(File::Spec->catdir($Bin, File::Spec->updir, File::Spec->updir, File::Spec->updir));
 
-my $bin = 'tools/haxparse/bin/haxparse-ok';
+my $haxc = File::Spec->catfile($ROOT, 'tools', 'haxparse', 'bin', 'haxc');
+my $file = File::Spec->catfile($ROOT, 'examples', 'ok', 'import_std_sys_io_ok.hax');
 
-my @files = qw(
-  examples/ok/import_std_sys_io_ok.hax
-);
+plan tests => 1;
 
-for my $path (@files) {
-  my $out = `$bin $path 2>&1`;
-  ok($? == 0, "stdlib import resolves: $path") or diag($out);
-}
-
-done_testing;
+my $ok = system($haxc, 'check', '--std', File::Spec->catdir($ROOT, 'std'), $file) == 0;
+ok($ok, "stdlib import resolves: examples/ok/import_std_sys_io_ok.hax");

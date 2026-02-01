@@ -1,11 +1,24 @@
 #!/usr/bin/env perl
-use v5.36;
 use strict;
 use warnings;
 
 use FindBin qw($Bin);
+use File::Spec;
+use Cwd qw(abs_path);
 
-# $Bin = .../tools/haxparse/bin
-my $tdir = "$Bin/../t";
+# tools/haxparse/bin -> repo root is ../../..
+my $root = abs_path( File::Spec->catdir($Bin, File::Spec->updir, File::Spec->updir, File::Spec->updir) );
 
-exec 'prove', '-lr', $tdir;
+# Run tests from repo root so relative fixtures like examples/ resolve.
+chdir $root or die "chdir($root): $!\n";
+
+my $prove = $ENV{HARNESS_PERL_SWITCHES} ? 'prove' : 'prove';
+my @args = @ARGV;
+
+# Default to running the haxparse test suite if no args were given.
+if (!@args) {
+  @args = ('-lr', 'tools/haxparse/t');
+}
+
+exec $prove, @args;
+die "exec(prove): $!\n";

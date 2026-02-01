@@ -1,0 +1,5 @@
+module IntCastBadArg;
+
+pub sub demo() -> int32 {
+  return int32("nope");
+}

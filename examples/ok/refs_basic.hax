@@ -2,9 +2,12 @@ module examples::refs_basic;
 
 import std::prelude;
 
-pub sub inc(^Int $p) -> Void {
+-- Reference variables use the '^' sigil. --
+-- The type annotation names the *pointee* type. --
+
+pub sub inc(Int ^p) -> Void {
   -- ^ parameters are write-through only; rebinding with := is forbidden. --
-  $p = $p + 1;
+  ^p = ^p + 1;
 }
 
 pub sub main() -> Void {
@@ -14,13 +17,13 @@ pub sub main() -> Void {
   assert($x == 11, "inc failed");
 
   -- Local ^ variable binding uses := and can be rebound. --
-  var ^Int $r := addr($x);
-  $r = 20;
+  var Int ^r := addr($x);
+  ^r = 20;
   assert($x == 20, "write-through failed");
 
   var Int $y = 5;
-  $r := addr($y);
-  $r = 6;
+  ^r := addr($y);
+  ^r = 6;
   assert($y == 6, "rebind failed");
 
   println("refs_basic ok");

@@ -185,12 +185,18 @@ sub _check_case ($case, $env, $mod_ast, $alias_to_mod, $std_root, $enum_cache, $
     for (my $i = 0; $i < @$binds; $i++) {
       my $b = $binds->[$i];
       next unless ref($b) eq 'HASH' && ($b->{kind} // '') eq 'PatBind';
-      next unless ref($b->{type}) eq 'HASH';  # no inference yet
-
       my $want_t = $fields->[$i]{type};
       next unless ref($want_t) eq 'HASH';
 
       $want_t = _subst_type($want_t, \%tparam_map) if %tparam_map;
+
+      # If the binder omits an explicit type, infer it from the matched enum
+      # variant payload type. This keeps the rest of the pipeline (ExprTypes)
+      # from treating the binder variable as undefined.
+      if (!ref($b->{type}) || ref($b->{type}) ne 'HASH') {
+        $b->{type} = $want_t;
+        next;
+      }
 
       my $want = _type_sig($want_t);
       my $got  = _type_sig($b->{type});
@@ -360,6 +366,24 @@ sub _scan_enum_arity ($path, $enum_name) {
 
   close $fh;
   return \%out;
+}
+
+sub _scan_enum_info ($path, $enum_name) {
+  # Fallback scanner used when we cannot fully parse/import the enum AST.
+  # Returns a structure compatible with _get_enum_info():
+  #   { tparams => [...], variants => { Name => { fields => [ {type=>...}, ... ] } } }
+  #
+  # Types are unknown in this fallback; we only recover payload arity so
+  # case binder checks can proceed without crashing.
+
+  my $arity = _scan_enum_arity($path, $enum_name);
+  my %v;
+  for my $vn (keys %$arity) {
+    my $n = $arity->{$vn} // 0;
+    $v{$vn} = { fields => [ map { +{ type => undef } } (1..$n) ] };
+  }
+
+  return { tparams => [], variants => \%v };
 }
 
 
