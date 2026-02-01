@@ -88,12 +88,19 @@ sub _module_to_path ($mod, $std_root, $include) {
   $rel =~ s{::}{/}g;
 
   my @candidates;
-  push @candidates, "$std_root/$rel.hax" if defined $std_root && length $std_root;
-  push @candidates, "$rel.hax";
+  # Search project roots first, then stdlib. The caller is expected to include
+  # the root file directory in `include`.
   for my $dir (@{ $include // [] }) {
     next if !defined $dir || $dir eq '';
     push @candidates, "$dir/$rel.hax";
   }
+
+  # Support running from repo root without -I by checking the project-relative
+  # path as a last-resort project lookup.
+  push @candidates, "$rel.hax";
+
+  # Finally, search stdlib.
+  push @candidates, "$std_root/$rel.hax" if defined $std_root && length $std_root;
 
   for my $p (@candidates) {
     return $p if -f $p;

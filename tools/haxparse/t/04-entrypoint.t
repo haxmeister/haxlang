@@ -3,7 +3,7 @@ use strict;
 use warnings;
 use Test::More;
 
-my $bin_ok = 'tools/haxparse/bin/haxprog-ok';
+my $bin_ok = 'tools/haxparse/bin/haxc';
 
 # Program OKs
 {
@@ -14,7 +14,7 @@ my $bin_ok = 'tools/haxparse/bin/haxprog-ok';
 
   for my $f (@files) {
     my $path = "$dir/$f";
-    my $out  = `$bin_ok $path 2>&1`;
+    my $out  = `$bin_ok check $path 2>&1`;
     ok($? == 0, "OK program: $f") or diag($out);
   }
 }
@@ -28,7 +28,7 @@ my $bin_ok = 'tools/haxparse/bin/haxprog-ok';
 
   for my $f (@files) {
     my $path = "$dir/$f";
-    my $out  = `$bin_ok $path 2>&1`;
+    my $out  = `$bin_ok check $path 2>&1`;
     ok($? != 0, "FAIL program (as expected): $f") or diag($out);
   }
 }

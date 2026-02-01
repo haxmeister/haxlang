@@ -10,3 +10,4 @@
 - Block comments `-- ... --` and Perl-like single-quoted raw strings.
 - Grammar frozen for v0.1 (EBNF is normative).
 - Programs: entrypoint is `sub main()` in the program root module; `main` need not be `pub`.
+- Add `spec/modules.md` defining program root selection and import search order.
