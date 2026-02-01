@@ -1,0 +1,5 @@
+module Examples::ProgNoMain;
+
+sub not_main() -> Int {
+  return 0;
+}

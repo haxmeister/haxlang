@@ -1,0 +1,5 @@
+module Examples::ProgMainBadSig;
+
+sub main(Int $code) -> Int {
+  return $code;
+}

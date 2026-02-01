@@ -4,6 +4,9 @@
 module std::io;
 ```
 
+`std::io` is the user-facing I/O surface in v0.1. It is specified as a thin
+wrapper over `std::sys::IO`.
+
 ## Printing
 
 ```hax
@@ -24,8 +27,8 @@ pub sub write_file(Str $path, Str $data) -> Result[Int, IoError];
 
 ```hax
 pub enum IoError {
-  NotFound { Str path };
-  PermissionDenied { Str path };
-  Other { Str message };
+  NotFound(Str path);
+  PermissionDenied(Str path);
+  Other(Str message);
 }
 ```

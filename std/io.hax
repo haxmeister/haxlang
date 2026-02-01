@@ -1,0 +1,63 @@
+module std::io;
+
+from std::core::Result import Result;
+from std::sys::IO import write_stdout, write_stderr;
+from std::sys::IO import read_file as sys_read_file;
+from std::sys::IO import write_file as sys_write_file;
+from std::sys::IO import IOError;
+
+--
+High-level IO convenience functions.
+
+v0.1 intentionally keeps std::io primitive:
+  * printing to stdout/stderr
+  * whole-file helpers (read_file/write_file)
+
+Implementation note:
+  std::io is a thin wrapper over std::sys::IO.
+  print/eprint ignore underlying write errors in v0.1.
+--
+
+pub enum IoError {
+  NotFound(Str path);
+  PermissionDenied(Str path);
+  Other(Str message);
+}
+
+sub _map_sys_error(Str $path, IOError $e) -> IoError {
+  -- NOTE: numeric codes are intentionally POSIX-shaped (ENOENT=2, EACCES=13).
+  -- Backends on non-POSIX systems may map their platform errors accordingly.
+  if ($e.code == 2) {
+    return IoError::NotFound($path);
+  }
+  if ($e.code == 13) {
+    return IoError::PermissionDenied($path);
+  }
+  return IoError::Other($e.msg);
+}
+
+pub sub print(Str $s) -> Void {
+  -- ignore underlying write errors in v0.1
+  write_stdout($s);
+}
+
+pub sub eprint(Str $s) -> Void {
+  -- ignore underlying write errors in v0.1
+  write_stderr($s);
+}
+
+pub sub read_file(Str $path) -> Result[Str, IoError] {
+  var Result[Str, IOError] $r = sys_read_file($path);
+  case $r {
+    Ok($s)  => { return Result::Ok($s) }
+    Err($e) => { return Result::Err(_map_sys_error($path, $e)) }
+  }
+}
+
+pub sub write_file(Str $path, Str $data) -> Result[Int, IoError] {
+  var Result[Int, IOError] $r = sys_write_file($path, $data);
+  case $r {
+    Ok($n)  => { return Result::Ok($n) }
+    Err($e) => { return Result::Err(_map_sys_error($path, $e)) }
+  }
+}

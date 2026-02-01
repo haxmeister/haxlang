@@ -60,3 +60,23 @@ __sys_write(Int fd, Str buf) -> Int
 __sys_errno() -> Int
 ```
 - Returns the last OS error code.
+
+### 5) Whole-file operations
+
+These intrinsics support the v0.1 whole-file helpers in `std::sys::IO` and `std::io`.
+
+#### `__sys_read_file`
+```
+__sys_read_file(Str path) -> Result[Str, Int]
+```
+- Reads the entire file at `path`.
+- Returns `Ok(contents)` on success.
+- Returns `Err(code)` on failure, where `code` is a platform error code (e.g., POSIX `errno`).
+
+#### `__sys_write_file`
+```
+__sys_write_file(Str path, Str data) -> Result[Int, Int]
+```
+- Writes `data` to `path`, replacing the file if it exists.
+- Returns `Ok(nbytes)` on success.
+- Returns `Err(code)` on failure, where `code` is a platform error code (e.g., POSIX `errno`).

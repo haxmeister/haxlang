@@ -8,6 +8,9 @@ Very small IO façade around sys intrinsics.
 Intrinsics (compiler/runtime provided):
   __sys_write(Int fd, Str buf) -> Int
   __sys_errno() -> Int
+
+  __sys_read_file(Str path) -> Result[Str, Int]
+  __sys_write_file(Str path, Str data) -> Result[Int, Int]
 --
 
 pub struct IOError {
@@ -15,13 +18,17 @@ pub struct IOError {
   pub field Str msg;
 }
 
+sub _mkerr(Int $code, Str $msg) -> IOError {
+  var IOError $e;
+  $e.code = $code;
+  $e.msg  = $msg;
+  return $e;
+}
+
 pub sub write_stdout(Str $s) -> Result[Int, IOError] {
   var Int $rc = __sys_write(1, $s);
   if ($rc < 0) {
-    var IOError $e;
-    $e.code = __sys_errno();
-    $e.msg  = "write";
-    return Result::Err($e);
+    return Result::Err(_mkerr(__sys_errno(), "write_stdout"));
   }
   return Result::Ok($rc);
 }
@@ -29,10 +36,23 @@ pub sub write_stdout(Str $s) -> Result[Int, IOError] {
 pub sub write_stderr(Str $s) -> Result[Int, IOError] {
   var Int $rc = __sys_write(2, $s);
   if ($rc < 0) {
-    var IOError $e;
-    $e.code = __sys_errno();
-    $e.msg  = "write";
-    return Result::Err($e);
+    return Result::Err(_mkerr(__sys_errno(), "write_stderr"));
   }
   return Result::Ok($rc);
+}
+
+pub sub read_file(Str $path) -> Result[Str, IOError] {
+  var Result[Str, Int] $r = __sys_read_file($path);
+  case $r {
+    Ok($s)  => { return Result::Ok($s) }
+    Err($c) => { return Result::Err(_mkerr($c, "read_file")) }
+  }
+}
+
+pub sub write_file(Str $path, Str $data) -> Result[Int, IOError] {
+  var Result[Int, Int] $r = __sys_write_file($path, $data);
+  case $r {
+    Ok($n)  => { return Result::Ok($n) }
+    Err($c) => { return Result::Err(_mkerr($c, "write_file")) }
+  }
 }

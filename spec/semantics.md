@@ -36,6 +36,21 @@ Unqualified name lookup order:
 3. Names introduced by `from ... import ...`
 4. Otherwise: compile-time error (must qualify or import)
 
+## Programs and entrypoints
+
+Hax distinguishes *modules* from *programs*. Most semantic checks operate on a single module. An executable program additionally designates a **program root module**.
+
+### Entrypoint selection (v0.1)
+
+- The program root module MUST define exactly one subroutine named `main`.
+- `main` does **not** need to be declared `pub`. (Rule B)
+- `main` MUST take zero parameters.
+- `main` MUST return `Void`/`Unit` or an integer type (`int`/`int32`).
+- If `main` returns `Void`/`Unit`, the process exit code is `0`.
+- If `main` returns an integer type, the return value is used as the process exit code (implementation-defined truncation).
+
+The compiler MUST error when compiling a program if the above rules are not met.
+
 ## Types (core)
 
 Builtin types:

@@ -1,0 +1,34 @@
+module examples::io_read_write_types_ok;
+
+
+import std::io;
+import std::core::Result as Result;
+from std::io import IoError;
+
+pub sub main() -> Int {
+
+  var Result::Result[Str, IoError] $r = std::io::read_file("README.md");
+  case ($r) {
+    when Ok(Str $s) {
+      std::io::print($s);
+    }
+    when Err(IoError $e) {
+      std::io::eprint("read_file failed\n");
+      return 1;
+    }
+  }
+
+
+  var Result::Result[Int, IoError] $w = std::io::write_file("/tmp/haxlang_io_test.txt", "ok\n");
+  case ($w) {
+    when Ok(Int $n) {
+      
+    }
+    when Err(IoError $e) {
+      std::io::eprint("write_file failed\n");
+      return 1;
+    }
+  }
+
+  return 0;
+}

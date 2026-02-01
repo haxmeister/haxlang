@@ -1,0 +1,146 @@
+#!/usr/bin/env perl
+use v5.36;
+use strict;
+use warnings;
+
+use FindBin qw($Bin);
+use lib "$Bin/../lib";
+
+use Hax::Lexer;
+use Hax::Parser;
+use Hax::Check::Imports;
+use Hax::Check::ImportCollision;
+use Hax::Check::ResolveImports;
+use Hax::Check::BoolOps;
+use Hax::Check::CaseExhaustive;
+use Hax::Check::CasePayloads;
+use Hax::Check::CaseBinderScope;
+use Hax::Check::RefParamRebind;
+use Hax::Check::ExprTypes;
+use Hax::Check::Unreachable;
+use Hax::Check::MustReturn;
+use Hax::Check::Entrypoint;
+
+sub slurp_utf8 ($path) {
+  open(my $fh, '<:encoding(UTF-8)', $path) or die "open $path: $!\n";
+  return do { local $/; <$fh> };
+}
+
+sub parse_and_check_program ($path) {
+  my $src = slurp_utf8($path);
+
+  my $lex = Hax::Lexer->new(file => $path, src => $src);
+  my $p   = Hax::Parser->new(lexer => $lex);
+  my $ast = $p->parse;  # dies on syntax error
+
+  my @i = Hax::Check::Imports::check_module($ast);
+  if (@i) {
+    my $e = $i[0];
+    die "$e->{msg} at $e->{file}:$e->{line}:$e->{col}\n";
+  }
+
+  my @ic = Hax::Check::ImportCollision::check_module($ast);
+  if (@ic) {
+    my $e = $ic[0];
+    die "$e->{msg} at $e->{file}:$e->{line}:$e->{col}\n";
+  }
+
+  my @ri = Hax::Check::ResolveImports::check_module($ast, std_root => 'std');
+  if (@ri) {
+    my $e = $ri[0];
+    die "$e->{msg} at $e->{file}:$e->{line}:$e->{col}\n";
+  }
+
+  my @c = Hax::Check::CaseExhaustive::check_module($ast, std_root => 'std');
+  if (@c) {
+    my $e = $c[0];
+    die "$e->{msg} at $e->{file}:$e->{line}:$e->{col}\n";
+  }
+
+  my @cp = Hax::Check::CasePayloads::check_module($ast, std_root => 'std');
+  if (@cp) {
+    my $e = $cp[0];
+    die "$e->{msg} at $e->{file}:$e->{line}:$e->{col}\n";
+  }
+
+  my @s = Hax::Check::CaseBinderScope::check_module($ast);
+  if (@s) {
+    my $e = $s[0];
+    die "$e->{msg} at $e->{file}:$e->{line}:$e->{col}\n";
+  }
+
+  my @b = Hax::Check::BoolOps::check_module($ast);
+  if (@b) {
+    my $e = $b[0];
+    die "$e->{msg} at $e->{file}:$e->{line}:$e->{col}\n";
+  }
+
+  my @r = Hax::Check::RefParamRebind::check_module($ast);
+  if (@r) {
+    my $e = $r[0];
+    die "$e->{msg} at $e->{file}:$e->{line}:$e->{col}\n";
+  }
+
+  my @t = Hax::Check::ExprTypes::check_module($ast);
+  if (@t) {
+    my $e = $t[0];
+    die "$e->{msg} at $e->{file}:$e->{line}:$e->{col}\n";
+  }
+
+  my @u = Hax::Check::Unreachable::check_module($ast);
+  if (@u) {
+    my $e = $u[0];
+    die "$e->{msg} at $e->{file}:$e->{line}:$e->{col}\n";
+  }
+
+  my @m = Hax::Check::MustReturn::check_module($ast);
+  if (@m) {
+    my $e = $m[0];
+    die "$e->{msg} at $e->{file}:$e->{line}:$e->{col}\n";
+  }
+
+  my @ep = Hax::Check::Entrypoint::check_program($ast);
+  if (@ep) {
+    my $e = $ep[0];
+    die "$e->{msg} at $e->{file}:$e->{line}:$e->{col}\n";
+  }
+
+  return 1;
+}
+
+my $arg = shift(@ARGV) // die "usage: $0 <file.hax|dir>\n";
+
+if (-f $arg) {
+  my $path = $arg;
+  eval { parse_and_check_program($path); 1 } or do {
+    chomp(my $err = $@ || "error");
+    print "NOT OK  $path\n$err\n";
+    exit 1;
+  };
+  print "OK      $path\n\nSummary: OK=1  FAIL=0\n";
+  exit 0;
+}
+
+my $dir = $arg;
+
+opendir(my $dh, $dir) or die "opendir $dir: $!\n";
+my @files = sort grep { /\.hax\z/ && -f "$dir/$_" } readdir($dh);
+closedir($dh);
+
+die "No .hax files found in $dir\n" if !@files;
+
+my ($ok, $bad) = (0, 0);
+for my $f (@files) {
+  my $path = "$dir/$f";
+  eval { parse_and_check_program($path); 1 } or do {
+    chomp(my $err = $@ || "error");
+    print "NOT OK  $path\n$err\n";
+    $bad++;
+    next;
+  };
+  print "OK      $path\n";
+  $ok++;
+}
+
+print "\nSummary: OK=$ok  FAIL=$bad\n";
+exit($bad ? 1 : 0);

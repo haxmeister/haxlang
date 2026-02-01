@@ -1,0 +1,8 @@
+module examples::import_std_sys_io_ok;
+
+
+from std::sys::IO import write_stdout;
+
+pub sub main() -> Void {
+  write_stdout("import ok\n");
+}
