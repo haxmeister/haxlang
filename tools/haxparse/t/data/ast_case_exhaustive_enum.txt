@@ -1,0 +1,251 @@
+HAX AST v0.1
+phase: checked_ast
+mode: library
+root: examples/ok/case_exhaustive_enum.hax
+stdlib: ./std
+include: examples/ok
+
+(Module
+  span: examples/ok/case_exhaustive_enum.hax:1:1..1:1
+  name: examples::case_exhaustive_enum
+  items:
+    [
+      (Import
+        span: examples/ok/case_exhaustive_enum.hax:3:1..3:1
+        module: std::prelude
+        as: null
+      )
+      (Import
+        span: examples/ok/case_exhaustive_enum.hax:4:1..4:1
+        module: std::core::Option
+        as: Option
+      )
+      (Sub
+        span: examples/ok/case_exhaustive_enum.hax:6:5..6:5
+        name: main
+        vis: pub
+        params:
+          []
+        ret:
+          (TypeName
+            span: examples/ok/case_exhaustive_enum.hax:6:19..6:24
+            name: Void
+          )
+        body:
+          (Block
+            span: examples/ok/case_exhaustive_enum.hax:6:24..6:24
+            stmts:
+              [
+                (VarDecl
+                  span: examples/ok/case_exhaustive_enum.hax:7:3..7:3
+                  name: x
+                  sigil: "$"
+                  type:
+                    (TypeApply
+                      span: examples/ok/case_exhaustive_enum.hax:7:7..7:27
+                      args:
+                        [
+                          (TypeName
+                            span: examples/ok/case_exhaustive_enum.hax:7:22..7:25
+                            name: Int
+                          )
+                        ]
+                      base: Option::Option
+                    )
+                  init:
+                    (Name
+                      span: examples/ok/case_exhaustive_enum.hax:7:32..7:32
+                      name: Option::None
+                    )
+                  op: "="
+                  ref: 0
+                  storage: null
+                )
+                (VarDecl
+                  span: examples/ok/case_exhaustive_enum.hax:8:3..8:3
+                  name: v
+                  sigil: "$"
+                  type:
+                    (TypeName
+                      span: examples/ok/case_exhaustive_enum.hax:8:7..8:11
+                      name: Int
+                    )
+                  init:
+                    (LitInt
+                      span: examples/ok/case_exhaustive_enum.hax:8:16..8:16
+                      value: 0
+                      _type:
+                        (TypeName
+                          name: int
+                        )
+                    )
+                  op: "="
+                  ref: 0
+                  storage: null
+                )
+                (Case
+                  span: examples/ok/case_exhaustive_enum.hax:10:3..10:3
+                  else: null
+                  expr:
+                    (Var
+                      span: examples/ok/case_exhaustive_enum.hax:10:9..10:9
+                      name: x
+                      sigil: "$"
+                      _type:
+                        (TypeApply
+                          span: examples/ok/case_exhaustive_enum.hax:7:7..7:27
+                          args:
+                            [
+                              (TypeName
+                                span: examples/ok/case_exhaustive_enum.hax:7:22..7:25
+                                name: Int
+                              )
+                            ]
+                          base: Option::Option
+                        )
+                    )
+                  whens:
+                    [
+                      (When
+                        span: examples/ok/case_exhaustive_enum.hax:11:5..11:5
+                        body:
+                          (Block
+                            span: examples/ok/case_exhaustive_enum.hax:11:23..11:23
+                            stmts:
+                              [
+                                (Assign
+                                  span: examples/ok/case_exhaustive_enum.hax:12:7..12:7
+                                  lhs:
+                                    (Var
+                                      span: examples/ok/case_exhaustive_enum.hax:12:7..12:7
+                                      name: v
+                                      sigil: "$"
+                                    )
+                                  rhs:
+                                    (Var
+                                      span: examples/ok/case_exhaustive_enum.hax:12:12..12:12
+                                      name: n
+                                      sigil: "$"
+                                      _type:
+                                        (TypeName
+                                          span: examples/ok/case_exhaustive_enum.hax:11:15..11:19
+                                          name: Int
+                                        )
+                                    )
+                                  op: "="
+                                )
+                              ]
+                          )
+                        pat:
+                          (PatternVariant
+                            span: examples/ok/case_exhaustive_enum.hax:11:10..11:10
+                            name: Some
+                            bind:
+                              (PatBind
+                                span: examples/ok/case_exhaustive_enum.hax:11:10..11:10
+                                name: n
+                                sigil: "$"
+                                type:
+                                  (TypeName
+                                    span: examples/ok/case_exhaustive_enum.hax:11:15..11:19
+                                    name: Int
+                                  )
+                              )
+                          )
+                      )
+                      (When
+                        span: examples/ok/case_exhaustive_enum.hax:14:5..14:5
+                        body:
+                          (Block
+                            span: examples/ok/case_exhaustive_enum.hax:14:15..14:15
+                            stmts:
+                              [
+                                (Assign
+                                  span: examples/ok/case_exhaustive_enum.hax:15:7..15:7
+                                  lhs:
+                                    (Var
+                                      span: examples/ok/case_exhaustive_enum.hax:15:7..15:7
+                                      name: v
+                                      sigil: "$"
+                                    )
+                                  rhs:
+                                    (LitInt
+                                      span: examples/ok/case_exhaustive_enum.hax:15:12..15:12
+                                      value: 99
+                                      _type:
+                                        (TypeName
+                                          name: int
+                                        )
+                                    )
+                                  op: "="
+                                )
+                              ]
+                          )
+                        pat:
+                          (PatternVariant
+                            span: examples/ok/case_exhaustive_enum.hax:14:10..14:10
+                            name: None
+                            bind: null
+                          )
+                      )
+                    ]
+                  _exhaustive: 1
+                )
+                (ExprStmt
+                  span: examples/ok/case_exhaustive_enum.hax:19:3..19:3
+                  expr:
+                    (Call
+                      span: examples/ok/case_exhaustive_enum.hax:19:3..19:3
+                      callee:
+                        (Name
+                          span: examples/ok/case_exhaustive_enum.hax:19:3..19:3
+                          name: assert
+                        )
+                      args:
+                        [
+                          (BinOp
+                            span: examples/ok/case_exhaustive_enum.hax:19:10..19:10
+                            lhs:
+                              (Var
+                                span: examples/ok/case_exhaustive_enum.hax:19:10..19:10
+                                name: v
+                                sigil: "$"
+                              )
+                            rhs:
+                              (LitInt
+                                span: examples/ok/case_exhaustive_enum.hax:19:16..19:16
+                                value: 99
+                              )
+                            op: "=="
+                          )
+                          (LitStr
+                            span: examples/ok/case_exhaustive_enum.hax:19:20..19:20
+                            value: "case_exhaustive_enum failed"
+                          )
+                        ]
+                    )
+                )
+                (ExprStmt
+                  span: examples/ok/case_exhaustive_enum.hax:20:3..20:3
+                  expr:
+                    (Call
+                      span: examples/ok/case_exhaustive_enum.hax:20:3..20:3
+                      callee:
+                        (Name
+                          span: examples/ok/case_exhaustive_enum.hax:20:3..20:3
+                          name: println
+                        )
+                      args:
+                        [
+                          (LitStr
+                            span: examples/ok/case_exhaustive_enum.hax:20:11..20:11
+                            value: "case_exhaustive_enum ok"
+                          )
+                        ]
+                    )
+                )
+              ]
+          )
+      )
+    ]
+)

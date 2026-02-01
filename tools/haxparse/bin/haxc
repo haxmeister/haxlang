@@ -24,12 +24,14 @@ use Hax::Check::ExprTypes;
 use Hax::Check::Unreachable;
 use Hax::Check::MustReturn;
 use Hax::Check::Entrypoint;
+use Hax::ASTDump;
 
 sub usage ($msg = undef) {
   print "$msg\n" if defined $msg;
   print <<"USAGE";
 usage:
   haxc check [options] <file.hax|dir>
+  haxc ast   [options] <file.hax|dir>
 
 options:
   -I <dir>     Add an import root (may be repeated)
@@ -39,6 +41,7 @@ options:
 notes:
   * The directory containing the root file is always searched first for imports.
   * Module path mapping: A::B::C -> A/B/C.hax
+  * 'ast' prints the checked+annotated AST to stdout (intended for compiler dev).
 USAGE
   exit(defined $msg ? 2 : 0);
 }
@@ -80,7 +83,7 @@ sub parse_and_check_program ($path, %opts) {
   _die_first_err(Hax::Check::MustReturn::check_module($ast));
 
   _die_first_err(Hax::Check::Entrypoint::check_program($ast)) if !$is_lib;
-  return 1;
+  return $ast;
 }
 
 sub cmd_check (@args) {
@@ -133,10 +136,67 @@ sub cmd_check (@args) {
   exit($bad ? 1 : 0);
 }
 
+sub cmd_ast (@args) {
+  my @I;
+  my $std_root = 'std';
+  my $lib = 0;
+
+  my $ok = GetOptionsFromArray(
+    \@args,
+    'I=s@'   => \@I,
+    'std=s'  => \$std_root,
+    'lib!'   => \$lib,
+    'h|help' => sub { usage() },
+  );
+
+  usage("invalid options") if !$ok;
+
+  my $arg = shift(@args) // usage("missing <file.hax|dir>");
+
+  my @files;
+  if (-f $arg) {
+    @files = ($arg);
+  } elsif (-d $arg) {
+    opendir(my $dh, $arg) or die "opendir $arg: $!\n";
+    @files = sort map { File::Spec->catfile($arg, $_) }
+             grep { /\.hax\z/ && -f File::Spec->catfile($arg, $_) } readdir($dh);
+    closedir($dh);
+    die "No .hax files found in $arg\n" if !@files;
+  } else {
+    die "No such file or directory: $arg\n";
+  }
+
+  my ($okc, $bad) = (0, 0);
+  my $first = 1;
+  for my $path (@files) {
+    my $root_dir = dirname($path);
+    my @include = ($root_dir, @I);
+
+    my $ast;
+    eval { $ast = parse_and_check_program($path, std_root => $std_root, include => \@include, is_lib => $lib); 1 } or do {
+      chomp(my $err = $@ || 'error');
+      print "NOT OK  $path\n$err\n";
+      $bad++;
+      next;
+    };
+
+    print "\n---\n\n" if !$first;
+    $first = 0;
+    print Hax::ASTDump::dump($ast, mode => ($lib ? 'library' : 'program'), root => $path, std_root => $std_root, include => \@include);
+    $okc++;
+  }
+
+  exit($bad ? 1 : 0);
+}
+
 my $cmd = shift(@ARGV) // usage();
 
 if ($cmd eq 'check') {
   cmd_check(@ARGV);
+}
+
+if ($cmd eq 'ast') {
+  cmd_ast(@ARGV);
 }
 
 usage("unknown command: $cmd");

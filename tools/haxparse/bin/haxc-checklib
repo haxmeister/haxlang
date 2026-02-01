@@ -1,0 +1,12 @@
+#!/usr/bin/env perl
+use strict;
+use warnings;
+use FindBin qw($Bin);
+
+# Thin wrapper for library/module checking mode.
+# Equivalent to: haxc check --lib <args>
+
+my $haxc = "$Bin/haxc";
+exec $haxc, 'check', '--lib', @ARGV;
+
+die "exec($haxc) failed: $!\n";

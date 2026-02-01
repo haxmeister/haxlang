@@ -1,0 +1,150 @@
+HAX AST v0.1
+phase: checked_ast
+mode: library
+root: examples/ok/never_ok.hax
+stdlib: ./std
+include: examples/ok
+
+(Module
+  span: examples/ok/never_ok.hax:2:1..2:1
+  name: ZZZ::NeverOk
+  items:
+    [
+      (Sub
+        span: examples/ok/never_ok.hax:4:1..4:1
+        name: f
+        vis: null
+        params:
+          [
+            (Param
+              span: examples/ok/never_ok.hax:4:7..4:7
+              name: b
+              sigil: "$"
+              type:
+                (TypeName
+                  span: examples/ok/never_ok.hax:4:7..4:12
+                  name: Bool
+                )
+              ref: 0
+            )
+          ]
+        ret:
+          (TypeName
+            span: examples/ok/never_ok.hax:4:19..4:23
+            name: Int
+          )
+        body:
+          (Block
+            span: examples/ok/never_ok.hax:4:23..4:23
+            stmts:
+              [
+                (If
+                  span: examples/ok/never_ok.hax:5:3..5:3
+                  cond:
+                    (Var
+                      span: examples/ok/never_ok.hax:5:7..5:7
+                      name: b
+                      sigil: "$"
+                      _type:
+                        (TypeName
+                          span: examples/ok/never_ok.hax:4:7..4:12
+                          name: Bool
+                        )
+                    )
+                  then:
+                    (Block
+                      span: examples/ok/never_ok.hax:5:11..5:11
+                      stmts:
+                        [
+                          (Return
+                            span: examples/ok/never_ok.hax:6:5..6:5
+                            expr:
+                              (LitInt
+                                span: examples/ok/never_ok.hax:6:12..6:12
+                                value: 1
+                                _type:
+                                  (TypeName
+                                    name: int
+                                  )
+                              )
+                          )
+                        ]
+                    )
+                  else:
+                    (Block
+                      span: examples/ok/never_ok.hax:7:10..7:10
+                      stmts:
+                        [
+                          (ExprStmt
+                            span: examples/ok/never_ok.hax:8:5..8:5
+                            expr:
+                              (Call
+                                span: examples/ok/never_ok.hax:8:5..8:5
+                                callee:
+                                  (Name
+                                    span: examples/ok/never_ok.hax:8:5..8:5
+                                    name: panic
+                                  )
+                                args:
+                                  []
+                                _type:
+                                  (TypeName
+                                    name: Never
+                                  )
+                              )
+                          )
+                        ]
+                    )
+                )
+              ]
+          )
+      )
+      (Sub
+        span: examples/ok/never_ok.hax:12:1..12:1
+        name: main
+        vis: null
+        params:
+          []
+        ret:
+          (TypeName
+            span: examples/ok/never_ok.hax:12:15..12:19
+            name: Int
+          )
+        body:
+          (Block
+            span: examples/ok/never_ok.hax:12:19..12:19
+            stmts:
+              [
+                (Return
+                  span: examples/ok/never_ok.hax:13:3..13:3
+                  expr:
+                    (Call
+                      span: examples/ok/never_ok.hax:13:10..13:10
+                      callee:
+                        (Name
+                          span: examples/ok/never_ok.hax:13:10..13:10
+                          name: f
+                        )
+                      args:
+                        [
+                          (LitBool
+                            span: examples/ok/never_ok.hax:13:12..13:12
+                            value: 1
+                            _type:
+                              (TypeName
+                                name: Bool
+                              )
+                          )
+                        ]
+                      _type:
+                        (TypeName
+                          span: examples/ok/never_ok.hax:4:19..4:23
+                          name: Int
+                        )
+                    )
+                )
+              ]
+          )
+      )
+    ]
+)
