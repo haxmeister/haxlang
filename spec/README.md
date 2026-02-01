@@ -2,6 +2,11 @@
 
 This directory contains the formal specification of the Hax programming language.
 
+v0.1 notes:
+
+- The grammar is frozen for v0.1.
+- `grammar.ebnf` is normative.
+
 ## Files
 
 - `grammar.ebnf` — Formal syntax definition (EBNF)

@@ -1,47 +1,65 @@
+# tools/haxparse
 
-## Gate: parse examples/ok
+This directory contains the v0.1 front-end tooling for Hax (parser + semantic checker) and its test harness.
 
-Run:
+## Primary tool: `haxc`
 
-    tools/haxparse/bin/haxparse-ok
+`haxc` is the front-door CLI for parsing and checking Hax source.
 
-Or specify a directory:
+All commands accept:
 
-    tools/haxparse/bin/haxparse-ok examples/ok
+- `-I <dir>` — add an import root for `import`/`from ... import ...`
+- `--std <dir>` — path to the standard library root (defaults to `./std` when run from repo root)
 
-Exit status is non-zero if any file fails to parse.
+### Program mode checking
 
-## Unreachable-code checking
+```bash
+tools/haxparse/bin/haxc check FILE.hax
+```
 
-`haxparse-ok` runs a conservative unreachable-code check (statements after `return` or `panic()` in the same block).
+Program mode enforces an entrypoint (v0.1 Rule B):
 
-## Must-return checking
+- `main` is special-cased and does not require `pub`.
+- `main` must have signature `() -> Void | int | int32`.
+- The root file may omit `module`; it is treated as the implicit root module.
 
-`haxparse-ok` enforces that any subroutine with a non-`Void` return type
-must return on all control-flow paths (or terminate via `panic`).
+### Library/module mode checking
 
-## Import resolution (imports only)
+```bash
+tools/haxparse/bin/haxc checklib FILE.hax
+```
 
-`haxparse-ok` validates that imported modules exist and that `from X import Y` refers to exported (`pub`) symbols.
+`checklib` is a thin wrapper over `haxc check --lib`.
 
-## Import checking
+### Checked AST dump (debugging)
 
-`haxparse-ok` runs an imports-only name resolution check:
-- detects collisions from `from ... import ...`
-- detects collisions with `import ... as Alias`
+```bash
+tools/haxparse/bin/haxc ast [--lib] FILE.hax
+```
 
+`haxc ast` prints the **checked/resolved** AST used by the checker, including annotations (e.g. inferred types and enum `case` exhaustiveness).
 
-## AST pretty-printer
+The AST dump is a compiler debugging view, not a stable external interface.
 
-Run:
+## Tests: `haxprove`
 
-    tools/haxparse/bin/haxpretty FILE.hax
+Run the test suite:
 
-Prints a human-readable tree of the parsed AST (no semantic checks).
+```bash
+tools/haxparse/bin/haxprove
+```
 
-## AST pretty-printer
+`haxprove` auto-chdirs to the repo root so tests are location-independent.
 
-Pretty-print the parsed AST:
+Examples are checked as part of the suite:
 
-    tools/haxparse/bin/haxpp FILE.hax
+- `examples/ok/*.hax` via library/module mode
+- `examples/prog_ok/*.hax` via program mode
 
+## Legacy developer utilities
+
+These scripts are useful during development:
+
+- `tools/haxparse/bin/haxpp` — pretty-print the parsed AST (no semantic checks)
+- `tools/haxparse/bin/haxpretty` — human-readable parse tree (no semantic checks)
+- `tools/haxparse/bin/haxparse-ok` — parse+check a directory (historical; mostly superseded by `haxc`)

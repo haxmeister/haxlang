@@ -1,41 +1,44 @@
 # Hax Standard Library (v0.1)
 
-The `std/` tree is a **normative** part of the Hax v0.1 definition.
+The `std/` directory is a **normative part of the Hax language definition**.
 
-If the written specification and `std/` disagree, `std/` is treated as the source of truth for behavior.
+- If the written specification and the standard library disagree, `std/` is the source of truth.
+- Language changes are not considered complete until `std/` has been updated to reflect them.
 
 ## Layering
 
-The standard library is structured in two layers:
+The standard library is intentionally split into two layers:
 
-* `std::sys::*` — the **intrinsic boundary**
-  * Minimal surface that maps to compiler/runtime-provided intrinsics.
-  * Documented normatively (and kept small).
+### `std::*` — user-facing APIs
 
-* `std::*` — the **user-facing** API
-  * Pure Hax code wrapping `std::sys::*`.
-  * Intended to keep user code stable even when the intrinsic boundary evolves.
+These are ordinary Hax modules intended for user code.
 
-## I/O (current surface)
+### `std::sys::*` — intrinsic boundary
 
-### `std::io`
+`std::sys::*` modules define the small set of operations provided by the compiler/runtime.
+These are the only places where intrinsic-backed functions live.
 
-`std::io` is a thin wrapper over `std::sys::IO`.
-
-* `print(Str) -> Void`
-* `eprint(Str) -> Void`
-* `read_file(Str) -> Result<Str, IoError>`
-* `write_file(Str, Str) -> Result<Int, IoError>`
+## v0.1 I/O
 
 ### `std::sys::IO`
 
-`std::sys::IO` defines the normative intrinsic-backed API:
+Defines the intrinsic-backed I/O boundary used by higher-level modules.
 
-* `write_stdout(Str) -> Void`
-* `write_stderr(Str) -> Void`
-* `read_file(Str) -> Result<Str, IoError>`
-* `write_file(Str, Str) -> Result<Int, IoError>`
+### `std::io`
 
-## Not present in v0.1
+A thin wrapper over `std::sys::IO` providing:
 
-The standard library does not expose `open()`-style streaming file handles in v0.1.
+- `print(Str) -> Void`
+- `eprint(Str) -> Void`
+- `read_file(Str) -> Result[Str, IoError]`
+- `write_file(Str, Str) -> Result[Int, IoError]`
+
+In v0.1, `print`/`eprint` intentionally ignore underlying write errors.
+
+## Prelude
+
+`std::prelude` exists and is intentionally small in v0.1. It is imported explicitly:
+
+```hax
+import std::prelude;
+```

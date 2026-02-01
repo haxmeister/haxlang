@@ -1,34 +1,73 @@
 # Hax
 
-Hax is a compiled programming language with a Perl-flavored surface syntax, designed for native compilation with explicit, predictable semantics.
+Hax is a statically typed programming language with a Perl-flavored surface syntax, designed for native compilation with explicit, predictable semantics.
 
-This repository currently contains the language specification (grammar + semantics) and a few example programs.
+v0.1 is intentionally small and spec-driven:
+
+- **Grammar is frozen for v0.1**
+- **`spec/grammar.ebnf` is normative**
+- No new syntax is planned for v0.1
 
 ## Repository layout
 
 - `spec/` — language specification (grammar, lexer, semantics)
-- `examples/` — small Hax examples
-- `tools/` — tooling (reserved for compiler/parser tools)
+- `std/` — **normative** standard library implemented in Hax
+- `examples/` — sample Hax programs (both library-mode and program-mode)
+- `tools/` — tooling (parser/checker front-end, test harness)
 
-## Normative Standard Library
+## Tooling
 
-The `std/` directory is a normative part of the Hax language definition.
+The front-door developer tool is `haxc` (currently shipped from `tools/haxparse/bin`).
 
-- If the written specification and the standard library disagree, the standard library is the source of truth.
-- Language changes are not considered complete until `std/` has been updated to reflect them.
-- The goal is that all non-primitive functionality lives in `std/` as Hax code, with a small, explicit set of compiler/runtime intrinsics.
+### Check a program (requires an entrypoint)
 
-### Intrinsics
+```bash
+tools/haxparse/bin/haxc check path/to/main.hax
+```
 
-Any symbol beginning with `__` is an intrinsic provided by the compiler/runtime.
-Intrinsics are intentionally few and must be documented in the spec whenever added or changed.
+Program mode rules (v0.1):
 
-### Standard library is normative
+- `main` is special-cased and **does not** require `pub`.
+- `main` must have signature `() -> Void | int | int32`.
+- The root file may omit `module`; it is treated as the implicit root module.
 
-Hax defines its semantics through real Hax code in `std/`.
-If the spec and `std/` disagree, `std/` wins.
+### Check a library/module (no entrypoint required)
 
+```bash
+tools/haxparse/bin/haxc checklib path/to/module.hax
+```
 
-## Status
+### Dump the checked AST (for compiler development)
 
-Spec is evolving; see `spec/changelog.md`.
+```bash
+tools/haxparse/bin/haxc ast --lib path/to/module.hax
+```
+
+`haxc ast` prints the **checked/resolved** AST used by the checker, including annotations such as inferred types and enum `case` exhaustiveness.
+
+### Run tests
+
+```bash
+tools/haxparse/bin/haxprove
+```
+
+`haxprove` auto-chdirs to the repo root, so tests are location-independent.
+
+## Standard library
+
+The `std/` directory is a **normative part of the Hax definition**. If the written spec and the standard library disagree, `std/` is the source of truth.
+
+For v0.1 I/O:
+
+- `std::io` provides `print`, `eprint`, `read_file`, and `write_file`.
+- `std::sys::IO` defines the intrinsic-backed boundary used by `std::io`.
+
+See `std/README.md` for details.
+
+## Specification
+
+Start here:
+
+- `spec/grammar.ebnf` — normative syntax
+- `spec/lexer.md` — comments and strings
+- `spec/semantics.md` — typing, `case` exhaustiveness, `Never`, and other semantic rules
