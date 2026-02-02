@@ -1,0 +1,12 @@
+HAX CORE IR v0.1
+phase: core_ir
+module: Demo
+
+(sub boom () -> Void
+  (block bb0
+    %v0 = const_str "no"
+    %v1 = call panic(%v0) : Never
+    unreachable
+  )
+)
+

@@ -1,0 +1,10 @@
+HAX CORE IR v0.1
+phase: core_ir
+module: Demo
+
+(sub foo () -> Void
+  (block bb0
+    return ()
+  )
+)
+

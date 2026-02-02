@@ -3,6 +3,7 @@ phase: checked_ast
 mode: library
 root: examples/ok/case_exhaustive_enum.hax
 stdlib: ./std
+<<<<<<< HEAD
 include: examples/ok
 
 (Module
@@ -24,10 +25,58 @@ include: examples/ok
         span: examples/ok/case_exhaustive_enum.hax:6:5..6:5
         name: main
         vis: pub
+=======
+include: examples/ok, examples/ok
+
+(Module
+  span: {
+  ecol: 1
+  eline: 1
+  file: "examples/ok/case_exhaustive_enum.hax"
+  scol: 1
+  sline: 1
+}
+  name: "examples::case_exhaustive_enum"
+  items:
+    [
+      (Import
+        span: {
+  ecol: 1
+  eline: 3
+  file: "examples/ok/case_exhaustive_enum.hax"
+  scol: 1
+  sline: 3
+}
+        module: "std::prelude"
+        as: null
+      )
+      (Import
+        span: {
+  ecol: 1
+  eline: 4
+  file: "examples/ok/case_exhaustive_enum.hax"
+  scol: 1
+  sline: 4
+}
+        module: "std::core::Option"
+        as: "Option"
+      )
+      (Sub
+        span: {
+  ecol: 5
+  eline: 6
+  file: "examples/ok/case_exhaustive_enum.hax"
+  scol: 5
+  sline: 6
+}
+        name: "main"
+        vis: "pub"
+>>>>>>> 4b558b9 (add Core IR spec, ast + lower tooling, and tests)
         params:
           []
         ret:
           (TypeName
+<<<<<<< HEAD
             span: examples/ok/case_exhaustive_enum.hax:6:19..6:24
             name: Void
           )
@@ -56,12 +105,79 @@ include: examples/ok
                     (Name
                       span: examples/ok/case_exhaustive_enum.hax:7:32..7:32
                       name: Option::None
+=======
+            span: {
+  ecol: 24
+  eline: 6
+  file: "examples/ok/case_exhaustive_enum.hax"
+  scol: 19
+  sline: 6
+}
+            name: "Void"
+          )
+        body:
+          (Block
+            span: {
+  ecol: 24
+  eline: 6
+  file: "examples/ok/case_exhaustive_enum.hax"
+  scol: 24
+  sline: 6
+}
+            stmts:
+              [
+                (VarDecl
+                  span: {
+  ecol: 3
+  eline: 7
+  file: "examples/ok/case_exhaustive_enum.hax"
+  scol: 3
+  sline: 7
+}
+                  name: "x"
+                  sigil: "$"
+                  type:
+                    (TypeApply
+                      span: {
+  ecol: 27
+  eline: 7
+  file: "examples/ok/case_exhaustive_enum.hax"
+  scol: 7
+  sline: 7
+}
+                      args:
+                        [
+                          (TypeName
+                            span: {
+  ecol: 25
+  eline: 7
+  file: "examples/ok/case_exhaustive_enum.hax"
+  scol: 22
+  sline: 7
+}
+                            name: "Int"
+                          )
+                        ]
+                      base: "Option::Option"
+                    )
+                  init:
+                    (Name
+                      span: {
+  ecol: 32
+  eline: 7
+  file: "examples/ok/case_exhaustive_enum.hax"
+  scol: 32
+  sline: 7
+}
+                      name: "Option::None"
+>>>>>>> 4b558b9 (add Core IR spec, ast + lower tooling, and tests)
                     )
                   op: "="
                   ref: 0
                   storage: null
                 )
                 (VarDecl
+<<<<<<< HEAD
                   span: examples/ok/case_exhaustive_enum.hax:8:3..8:3
                   name: v
                   sigil: "$"
@@ -77,6 +193,41 @@ include: examples/ok
                       _type:
                         (TypeName
                           name: int
+=======
+                  span: {
+  ecol: 3
+  eline: 8
+  file: "examples/ok/case_exhaustive_enum.hax"
+  scol: 3
+  sline: 8
+}
+                  name: "v"
+                  sigil: "$"
+                  type:
+                    (TypeName
+                      span: {
+  ecol: 11
+  eline: 8
+  file: "examples/ok/case_exhaustive_enum.hax"
+  scol: 7
+  sline: 8
+}
+                      name: "Int"
+                    )
+                  init:
+                    (LitInt
+                      span: {
+  ecol: 16
+  eline: 8
+  file: "examples/ok/case_exhaustive_enum.hax"
+  scol: 16
+  sline: 8
+}
+                      value: 0
+                      _type:
+                        (TypeName
+                          name: "int"
+>>>>>>> 4b558b9 (add Core IR spec, ast + lower tooling, and tests)
                         )
                     )
                   op: "="
@@ -84,6 +235,7 @@ include: examples/ok
                   storage: null
                 )
                 (Case
+<<<<<<< HEAD
                   span: examples/ok/case_exhaustive_enum.hax:10:3..10:3
                   else: null
                   expr:
@@ -102,11 +254,55 @@ include: examples/ok
                               )
                             ]
                           base: Option::Option
+=======
+                  span: {
+  ecol: 3
+  eline: 10
+  file: "examples/ok/case_exhaustive_enum.hax"
+  scol: 3
+  sline: 10
+}
+                  expr:
+                    (Var
+                      span: {
+  ecol: 9
+  eline: 10
+  file: "examples/ok/case_exhaustive_enum.hax"
+  scol: 9
+  sline: 10
+}
+                      name: "x"
+                      sigil: "$"
+                      _type:
+                        (TypeApply
+                          span: {
+  ecol: 27
+  eline: 7
+  file: "examples/ok/case_exhaustive_enum.hax"
+  scol: 7
+  sline: 7
+}
+                          args:
+                            [
+                              (TypeName
+                                span: {
+  ecol: 25
+  eline: 7
+  file: "examples/ok/case_exhaustive_enum.hax"
+  scol: 22
+  sline: 7
+}
+                                name: "Int"
+                              )
+                            ]
+                          base: "Option::Option"
+>>>>>>> 4b558b9 (add Core IR spec, ast + lower tooling, and tests)
                         )
                     )
                   whens:
                     [
                       (When
+<<<<<<< HEAD
                         span: examples/ok/case_exhaustive_enum.hax:11:5..11:5
                         body:
                           (Block
@@ -119,10 +315,83 @@ include: examples/ok
                                     (Var
                                       span: examples/ok/case_exhaustive_enum.hax:12:7..12:7
                                       name: v
+=======
+                        span: {
+  ecol: 5
+  eline: 11
+  file: "examples/ok/case_exhaustive_enum.hax"
+  scol: 5
+  sline: 11
+}
+                        pat:
+                          (PatternVariant
+                            span: {
+  ecol: 10
+  eline: 11
+  file: "examples/ok/case_exhaustive_enum.hax"
+  scol: 10
+  sline: 11
+}
+                            name: "Some"
+                            bind:
+                              (PatBind
+                                span: {
+  ecol: 10
+  eline: 11
+  file: "examples/ok/case_exhaustive_enum.hax"
+  scol: 10
+  sline: 11
+}
+                                name: "n"
+                                sigil: "$"
+                                type:
+                                  (TypeName
+                                    span: {
+  ecol: 19
+  eline: 11
+  file: "examples/ok/case_exhaustive_enum.hax"
+  scol: 15
+  sline: 11
+}
+                                    name: "Int"
+                                  )
+                              )
+                          )
+                        body:
+                          (Block
+                            span: {
+  ecol: 23
+  eline: 11
+  file: "examples/ok/case_exhaustive_enum.hax"
+  scol: 23
+  sline: 11
+}
+                            stmts:
+                              [
+                                (Assign
+                                  span: {
+  ecol: 7
+  eline: 12
+  file: "examples/ok/case_exhaustive_enum.hax"
+  scol: 7
+  sline: 12
+}
+                                  lhs:
+                                    (Var
+                                      span: {
+  ecol: 7
+  eline: 12
+  file: "examples/ok/case_exhaustive_enum.hax"
+  scol: 7
+  sline: 12
+}
+                                      name: "v"
+>>>>>>> 4b558b9 (add Core IR spec, ast + lower tooling, and tests)
                                       sigil: "$"
                                     )
                                   rhs:
                                     (Var
+<<<<<<< HEAD
                                       span: examples/ok/case_exhaustive_enum.hax:12:12..12:12
                                       name: n
                                       sigil: "$"
@@ -130,12 +399,34 @@ include: examples/ok
                                         (TypeName
                                           span: examples/ok/case_exhaustive_enum.hax:11:15..11:19
                                           name: Int
+=======
+                                      span: {
+  ecol: 12
+  eline: 12
+  file: "examples/ok/case_exhaustive_enum.hax"
+  scol: 12
+  sline: 12
+}
+                                      name: "n"
+                                      sigil: "$"
+                                      _type:
+                                        (TypeName
+                                          span: {
+  ecol: 19
+  eline: 11
+  file: "examples/ok/case_exhaustive_enum.hax"
+  scol: 15
+  sline: 11
+}
+                                          name: "Int"
+>>>>>>> 4b558b9 (add Core IR spec, ast + lower tooling, and tests)
                                         )
                                     )
                                   op: "="
                                 )
                               ]
                           )
+<<<<<<< HEAD
                         pat:
                           (PatternVariant
                             span: examples/ok/case_exhaustive_enum.hax:11:10..11:10
@@ -166,21 +457,88 @@ include: examples/ok
                                     (Var
                                       span: examples/ok/case_exhaustive_enum.hax:15:7..15:7
                                       name: v
+=======
+                      )
+                      (When
+                        span: {
+  ecol: 5
+  eline: 14
+  file: "examples/ok/case_exhaustive_enum.hax"
+  scol: 5
+  sline: 14
+}
+                        pat:
+                          (PatternVariant
+                            span: {
+  ecol: 10
+  eline: 14
+  file: "examples/ok/case_exhaustive_enum.hax"
+  scol: 10
+  sline: 14
+}
+                            name: "None"
+                            bind: null
+                          )
+                        body:
+                          (Block
+                            span: {
+  ecol: 15
+  eline: 14
+  file: "examples/ok/case_exhaustive_enum.hax"
+  scol: 15
+  sline: 14
+}
+                            stmts:
+                              [
+                                (Assign
+                                  span: {
+  ecol: 7
+  eline: 15
+  file: "examples/ok/case_exhaustive_enum.hax"
+  scol: 7
+  sline: 15
+}
+                                  lhs:
+                                    (Var
+                                      span: {
+  ecol: 7
+  eline: 15
+  file: "examples/ok/case_exhaustive_enum.hax"
+  scol: 7
+  sline: 15
+}
+                                      name: "v"
+>>>>>>> 4b558b9 (add Core IR spec, ast + lower tooling, and tests)
                                       sigil: "$"
                                     )
                                   rhs:
                                     (LitInt
+<<<<<<< HEAD
                                       span: examples/ok/case_exhaustive_enum.hax:15:12..15:12
                                       value: 99
                                       _type:
                                         (TypeName
                                           name: int
+=======
+                                      span: {
+  ecol: 12
+  eline: 15
+  file: "examples/ok/case_exhaustive_enum.hax"
+  scol: 12
+  sline: 15
+}
+                                      value: 99
+                                      _type:
+                                        (TypeName
+                                          name: "int"
+>>>>>>> 4b558b9 (add Core IR spec, ast + lower tooling, and tests)
                                         )
                                     )
                                   op: "="
                                 )
                               ]
                           )
+<<<<<<< HEAD
                         pat:
                           (PatternVariant
                             span: examples/ok/case_exhaustive_enum.hax:14:10..14:10
@@ -200,32 +558,107 @@ include: examples/ok
                         (Name
                           span: examples/ok/case_exhaustive_enum.hax:19:3..19:3
                           name: assert
+=======
+                      )
+                    ]
+                  else: null
+                  _exhaustive: 1
+                )
+                (ExprStmt
+                  span: {
+  ecol: 3
+  eline: 19
+  file: "examples/ok/case_exhaustive_enum.hax"
+  scol: 3
+  sline: 19
+}
+                  expr:
+                    (Call
+                      span: {
+  ecol: 3
+  eline: 19
+  file: "examples/ok/case_exhaustive_enum.hax"
+  scol: 3
+  sline: 19
+}
+                      callee:
+                        (Name
+                          span: {
+  ecol: 3
+  eline: 19
+  file: "examples/ok/case_exhaustive_enum.hax"
+  scol: 3
+  sline: 19
+}
+                          name: "assert"
+>>>>>>> 4b558b9 (add Core IR spec, ast + lower tooling, and tests)
                         )
                       args:
                         [
                           (BinOp
+<<<<<<< HEAD
                             span: examples/ok/case_exhaustive_enum.hax:19:10..19:10
                             lhs:
                               (Var
                                 span: examples/ok/case_exhaustive_enum.hax:19:10..19:10
                                 name: v
+=======
+                            span: {
+  ecol: 10
+  eline: 19
+  file: "examples/ok/case_exhaustive_enum.hax"
+  scol: 10
+  sline: 19
+}
+                            lhs:
+                              (Var
+                                span: {
+  ecol: 10
+  eline: 19
+  file: "examples/ok/case_exhaustive_enum.hax"
+  scol: 10
+  sline: 19
+}
+                                name: "v"
+>>>>>>> 4b558b9 (add Core IR spec, ast + lower tooling, and tests)
                                 sigil: "$"
                               )
                             rhs:
                               (LitInt
+<<<<<<< HEAD
                                 span: examples/ok/case_exhaustive_enum.hax:19:16..19:16
+=======
+                                span: {
+  ecol: 16
+  eline: 19
+  file: "examples/ok/case_exhaustive_enum.hax"
+  scol: 16
+  sline: 19
+}
+>>>>>>> 4b558b9 (add Core IR spec, ast + lower tooling, and tests)
                                 value: 99
                               )
                             op: "=="
                           )
                           (LitStr
+<<<<<<< HEAD
                             span: examples/ok/case_exhaustive_enum.hax:19:20..19:20
+=======
+                            span: {
+  ecol: 20
+  eline: 19
+  file: "examples/ok/case_exhaustive_enum.hax"
+  scol: 20
+  sline: 19
+}
+>>>>>>> 4b558b9 (add Core IR spec, ast + lower tooling, and tests)
                             value: "case_exhaustive_enum failed"
                           )
                         ]
                     )
                 )
                 (ExprStmt
+<<<<<<< HEAD
                   span: examples/ok/case_exhaustive_enum.hax:20:3..20:3
                   expr:
                     (Call
@@ -234,11 +667,49 @@ include: examples/ok
                         (Name
                           span: examples/ok/case_exhaustive_enum.hax:20:3..20:3
                           name: println
+=======
+                  span: {
+  ecol: 3
+  eline: 20
+  file: "examples/ok/case_exhaustive_enum.hax"
+  scol: 3
+  sline: 20
+}
+                  expr:
+                    (Call
+                      span: {
+  ecol: 3
+  eline: 20
+  file: "examples/ok/case_exhaustive_enum.hax"
+  scol: 3
+  sline: 20
+}
+                      callee:
+                        (Name
+                          span: {
+  ecol: 3
+  eline: 20
+  file: "examples/ok/case_exhaustive_enum.hax"
+  scol: 3
+  sline: 20
+}
+                          name: "println"
+>>>>>>> 4b558b9 (add Core IR spec, ast + lower tooling, and tests)
                         )
                       args:
                         [
                           (LitStr
+<<<<<<< HEAD
                             span: examples/ok/case_exhaustive_enum.hax:20:11..20:11
+=======
+                            span: {
+  ecol: 11
+  eline: 20
+  file: "examples/ok/case_exhaustive_enum.hax"
+  scol: 11
+  sline: 20
+}
+>>>>>>> 4b558b9 (add Core IR spec, ast + lower tooling, and tests)
                             value: "case_exhaustive_enum ok"
                           )
                         ]

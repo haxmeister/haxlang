@@ -3,6 +3,7 @@ phase: checked_ast
 mode: library
 root: examples/ok/never_ok.hax
 stdlib: ./std
+<<<<<<< HEAD
 include: examples/ok
 
 (Module
@@ -13,10 +14,35 @@ include: examples/ok
       (Sub
         span: examples/ok/never_ok.hax:4:1..4:1
         name: f
+=======
+include: examples/ok, examples/ok
+
+(Module
+  span: {
+  ecol: 1
+  eline: 2
+  file: "examples/ok/never_ok.hax"
+  scol: 1
+  sline: 2
+}
+  name: "ZZZ::NeverOk"
+  items:
+    [
+      (Sub
+        span: {
+  ecol: 1
+  eline: 4
+  file: "examples/ok/never_ok.hax"
+  scol: 1
+  sline: 4
+}
+        name: "f"
+>>>>>>> 4b558b9 (add Core IR spec, ast + lower tooling, and tests)
         vis: null
         params:
           [
             (Param
+<<<<<<< HEAD
               span: examples/ok/never_ok.hax:4:7..4:7
               name: b
               sigil: "$"
@@ -24,12 +50,34 @@ include: examples/ok
                 (TypeName
                   span: examples/ok/never_ok.hax:4:7..4:12
                   name: Bool
+=======
+              span: {
+  ecol: 7
+  eline: 4
+  file: "examples/ok/never_ok.hax"
+  scol: 7
+  sline: 4
+}
+              name: "b"
+              sigil: "$"
+              type:
+                (TypeName
+                  span: {
+  ecol: 12
+  eline: 4
+  file: "examples/ok/never_ok.hax"
+  scol: 7
+  sline: 4
+}
+                  name: "Bool"
+>>>>>>> 4b558b9 (add Core IR spec, ast + lower tooling, and tests)
                 )
               ref: 0
             )
           ]
         ret:
           (TypeName
+<<<<<<< HEAD
             span: examples/ok/never_ok.hax:4:19..4:23
             name: Int
           )
@@ -49,10 +97,62 @@ include: examples/ok
                         (TypeName
                           span: examples/ok/never_ok.hax:4:7..4:12
                           name: Bool
+=======
+            span: {
+  ecol: 23
+  eline: 4
+  file: "examples/ok/never_ok.hax"
+  scol: 19
+  sline: 4
+}
+            name: "Int"
+          )
+        body:
+          (Block
+            span: {
+  ecol: 23
+  eline: 4
+  file: "examples/ok/never_ok.hax"
+  scol: 23
+  sline: 4
+}
+            stmts:
+              [
+                (If
+                  span: {
+  ecol: 3
+  eline: 5
+  file: "examples/ok/never_ok.hax"
+  scol: 3
+  sline: 5
+}
+                  cond:
+                    (Var
+                      span: {
+  ecol: 7
+  eline: 5
+  file: "examples/ok/never_ok.hax"
+  scol: 7
+  sline: 5
+}
+                      name: "b"
+                      sigil: "$"
+                      _type:
+                        (TypeName
+                          span: {
+  ecol: 12
+  eline: 4
+  file: "examples/ok/never_ok.hax"
+  scol: 7
+  sline: 4
+}
+                          name: "Bool"
+>>>>>>> 4b558b9 (add Core IR spec, ast + lower tooling, and tests)
                         )
                     )
                   then:
                     (Block
+<<<<<<< HEAD
                       span: examples/ok/never_ok.hax:5:11..5:11
                       stmts:
                         [
@@ -65,6 +165,38 @@ include: examples/ok
                                 _type:
                                   (TypeName
                                     name: int
+=======
+                      span: {
+  ecol: 11
+  eline: 5
+  file: "examples/ok/never_ok.hax"
+  scol: 11
+  sline: 5
+}
+                      stmts:
+                        [
+                          (Return
+                            span: {
+  ecol: 5
+  eline: 6
+  file: "examples/ok/never_ok.hax"
+  scol: 5
+  sline: 6
+}
+                            expr:
+                              (LitInt
+                                span: {
+  ecol: 12
+  eline: 6
+  file: "examples/ok/never_ok.hax"
+  scol: 12
+  sline: 6
+}
+                                value: 1
+                                _type:
+                                  (TypeName
+                                    name: "int"
+>>>>>>> 4b558b9 (add Core IR spec, ast + lower tooling, and tests)
                                   )
                               )
                           )
@@ -72,6 +204,7 @@ include: examples/ok
                     )
                   else:
                     (Block
+<<<<<<< HEAD
                       span: examples/ok/never_ok.hax:7:10..7:10
                       stmts:
                         [
@@ -84,12 +217,54 @@ include: examples/ok
                                   (Name
                                     span: examples/ok/never_ok.hax:8:5..8:5
                                     name: panic
+=======
+                      span: {
+  ecol: 10
+  eline: 7
+  file: "examples/ok/never_ok.hax"
+  scol: 10
+  sline: 7
+}
+                      stmts:
+                        [
+                          (ExprStmt
+                            span: {
+  ecol: 5
+  eline: 8
+  file: "examples/ok/never_ok.hax"
+  scol: 5
+  sline: 8
+}
+                            expr:
+                              (Call
+                                span: {
+  ecol: 5
+  eline: 8
+  file: "examples/ok/never_ok.hax"
+  scol: 5
+  sline: 8
+}
+                                callee:
+                                  (Name
+                                    span: {
+  ecol: 5
+  eline: 8
+  file: "examples/ok/never_ok.hax"
+  scol: 5
+  sline: 8
+}
+                                    name: "panic"
+>>>>>>> 4b558b9 (add Core IR spec, ast + lower tooling, and tests)
                                   )
                                 args:
                                   []
                                 _type:
                                   (TypeName
+<<<<<<< HEAD
                                     name: Never
+=======
+                                    name: "Never"
+>>>>>>> 4b558b9 (add Core IR spec, ast + lower tooling, and tests)
                                   )
                               )
                           )
@@ -100,13 +275,25 @@ include: examples/ok
           )
       )
       (Sub
+<<<<<<< HEAD
         span: examples/ok/never_ok.hax:12:1..12:1
         name: main
+=======
+        span: {
+  ecol: 1
+  eline: 12
+  file: "examples/ok/never_ok.hax"
+  scol: 1
+  sline: 12
+}
+        name: "main"
+>>>>>>> 4b558b9 (add Core IR spec, ast + lower tooling, and tests)
         vis: null
         params:
           []
         ret:
           (TypeName
+<<<<<<< HEAD
             span: examples/ok/never_ok.hax:12:15..12:19
             name: Int
           )
@@ -124,22 +311,96 @@ include: examples/ok
                         (Name
                           span: examples/ok/never_ok.hax:13:10..13:10
                           name: f
+=======
+            span: {
+  ecol: 19
+  eline: 12
+  file: "examples/ok/never_ok.hax"
+  scol: 15
+  sline: 12
+}
+            name: "Int"
+          )
+        body:
+          (Block
+            span: {
+  ecol: 19
+  eline: 12
+  file: "examples/ok/never_ok.hax"
+  scol: 19
+  sline: 12
+}
+            stmts:
+              [
+                (Return
+                  span: {
+  ecol: 3
+  eline: 13
+  file: "examples/ok/never_ok.hax"
+  scol: 3
+  sline: 13
+}
+                  expr:
+                    (Call
+                      span: {
+  ecol: 10
+  eline: 13
+  file: "examples/ok/never_ok.hax"
+  scol: 10
+  sline: 13
+}
+                      callee:
+                        (Name
+                          span: {
+  ecol: 10
+  eline: 13
+  file: "examples/ok/never_ok.hax"
+  scol: 10
+  sline: 13
+}
+                          name: "f"
+>>>>>>> 4b558b9 (add Core IR spec, ast + lower tooling, and tests)
                         )
                       args:
                         [
                           (LitBool
+<<<<<<< HEAD
                             span: examples/ok/never_ok.hax:13:12..13:12
                             value: 1
                             _type:
                               (TypeName
                                 name: Bool
+=======
+                            span: {
+  ecol: 12
+  eline: 13
+  file: "examples/ok/never_ok.hax"
+  scol: 12
+  sline: 13
+}
+                            value: 1
+                            _type:
+                              (TypeName
+                                name: "Bool"
+>>>>>>> 4b558b9 (add Core IR spec, ast + lower tooling, and tests)
                               )
                           )
                         ]
                       _type:
                         (TypeName
+<<<<<<< HEAD
                           span: examples/ok/never_ok.hax:4:19..4:23
                           name: Int
+=======
+                          span: {
+  ecol: 23
+  eline: 4
+  file: "examples/ok/never_ok.hax"
+  scol: 19
+  sline: 4
+}
+                          name: "Int"
+>>>>>>> 4b558b9 (add Core IR spec, ast + lower tooling, and tests)
                         )
                     )
                 )

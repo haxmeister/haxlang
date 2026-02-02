@@ -1,0 +1,5 @@
+module Demo;
+
+pub sub foo() -> Void {
+  return;
+}

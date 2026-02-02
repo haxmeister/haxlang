@@ -1,12 +1,16 @@
 use v5.36;
 use strict;
 use warnings;
+<<<<<<< HEAD
 
+=======
+>>>>>>> 4b558b9 (add Core IR spec, ast + lower tooling, and tests)
 use Test::More;
 
 use FindBin qw($Bin);
 use Cwd qw(abs_path);
 
+<<<<<<< HEAD
 # Repo root is two levels above this test file: tools/haxparse/t
 my $repo = abs_path("$Bin/../../..");
 
@@ -72,6 +76,37 @@ for my $c (@cases) {
     my ($re, $label) = @$chk;
     like($out, $re, "$label ($c->{name})") or diag($out);
   }
+=======
+my $repo = abs_path("$Bin/../../..");
+die "Cannot locate repo root" if !$repo || !-d $repo;
+
+my $haxc = "$repo/tools/haxparse/bin/haxc";
+my $dir  = "$repo/examples/ok";
+my $data = "$Bin/data";
+
+plan skip_all => "Missing $haxc" if !-x $haxc;
+plan skip_all => "Missing examples directory: $dir" if !-d $dir;
+plan skip_all => "Missing stdlib directory: $repo/std" if !-d "$repo/std";
+plan skip_all => "Missing data directory: $data" if !-d $data;
+
+my @cases = (
+  ["case_exhaustive_enum.hax", "$data/ast_case_exhaustive_enum.txt"],
+  ["never_ok.hax", "$data/ast_never_ok.txt"],
+);
+
+for my $c (@cases) {
+  my ($file, $gold_path) = @$c;
+  my $rel = "examples/ok/$file";
+
+  open(my $gh, '<:encoding(UTF-8)', $gold_path) or die "open $gold_path: $!";
+  my $gold = do { local $/; <$gh> };
+  close $gh;
+
+  my $cmd = "(cd \"$repo\" && \"$haxc\" ast --lib --std ./std -I examples/ok \"$rel\" ) 2>&1";
+  my $out = `$cmd`;
+  ok($? == 0, "haxc ast exits 0 ($file)") or diag($out);
+  is($out, $gold, "AST snapshot matches ($file)");
+>>>>>>> 4b558b9 (add Core IR spec, ast + lower tooling, and tests)
 }
 
 done_testing;
